@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Reporte de Performance - PedidosYa</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      font-family: 'Outfit', sans-serif;
+      margin: 0;
+      background: #f4f4f4;
+      color: #100423;
+    }
+    .container {
+      max-width: 960px;
+      margin: 2rem auto;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+    }
+    h2 {
+      color: #ea044e;
+    }
+    select, input, button {
+      width: 100%;
+      margin: 10px 0;
+      padding: 10px;
+      font-family: inherit;
+    }
+    .card {
+      border: 2px solid #ccc;
+      padding: 20px;
+      margin: 20px 0;
+      border-radius: 10px;
+      background: #fff;
+    }
+    .card.plata { background: #cfe2f3; }
+    .card.oro { background: #fff4cc; }
+    .card.bronce { background: #f2e2d2; }
+    .card.reentreno { background: #f8d7da; }
+    .metric { margin: 6px 0; }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+<div class="container" id="login">
+  <h2>Acceso</h2>
+  <input type="text" id="usuario" placeholder="Usuario" />
+  <input type="password" id="contrasena" placeholder="Contraseña" />
+  <button onclick="validarLogin()">Ingresar</button>
+  <p id="error" style="color: red;"></p>
+</div>
+<div class="container hidden" id="app">
+  <h2>Reporte de Performance</h2>
+  <label>País</label>
+  <select id="pais"></select>
+  <label>Supervisor</label>
+  <select id="supervisor"></select>
+  <label>Sucursal</label>
+  <select id="sucursal"></select>
+  <label>Semana</label>
+  <select id="semana"></select>
+  <label>Shopper</label>
+  <select id="shopper"></select>
+  <div id="resultado"></div>
+</div>
+<script>
+  const USER = "reporte";
+  const PASS = "reporte";
+  function validarLogin() {
+    const u = document.getElementById("usuario").value;
+    const p = document.getElementById("contrasena").value;
+    if (u === USER && p === PASS) {
+      document.getElementById("login").classList.add("hidden");
+      document.getElementById("app").classList.remove("hidden");
+    } else {
+      document.getElementById("error").textContent = "Credenciales incorrectas";
+    }
+  }
+  const urlDATA = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSysN7kitfgQbwz062l0cSfdLmwQMJs-QPHbf8Hxk2nikUylagVMMcb_KZKZynjvQeVzr8l3t-5LGgK/pub?gid=0&single=true&output=csv";
+  const urlOVERALL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSysN7kitfgQbwz062l0cSfdLmwQMJs-QPHbf8Hxk2nikUylagVMMcb_KZKZynjvQeVzr8l3t-5LGgK/pub?gid=187588943&single=true&output=csv";
+  let data = [], overall = [];
+  function getColor(ranking) {
+    if (!ranking) return '';
+    ranking = ranking.toLowerCase();
+    if (ranking.includes("plata")) return "plata";
+    if (ranking.includes("oro")) return "oro";
+    if (ranking.includes("bronce")) return "bronce";
+    if (ranking.includes("re entrenamiento")) return "reentreno";
+    return '';
+  }
+  function cargarFiltros() {
+    const sets = { pais: new Set(), supervisor: new Set(), sucursal: new Set(), semana: new Set(), shopper: new Set() };
+    data.forEach(r => {
+      if (r["Pais"]) sets.pais.add(r["Pais"]);
+      if (r["Supervisor"]) sets.supervisor.add(r["Supervisor"]);
+      if (r["Sucursal"]) sets.sucursal.add(r["Sucursal"]);
+      if (r["Semana"]) sets.semana.add(r["Semana"]);
+      if (r["Nombre"]) sets.shopper.add(r["Nombre"]);
+    });
+    Object.entries(sets).forEach(([key, set]) => {
+      const el = document.getElementById(key);
+      el.innerHTML = '<option value="">Todos</option>';
+      [...set].sort().forEach(v => {
+        const opt = document.createElement("option");
+        opt.value = v; opt.textContent = v;
+        el.appendChild(opt);
+      });
+      el.addEventListener("change", mostrarResultados);
+    });
+  }
+  function mostrarResultados() {
+    const p = document.getElementById("pais").value;
+    const s = document.getElementById("sucursal").value;
+    const w = document.getElementById("semana").value;
+    const sh = document.getElementById("shopper").value;
+    const sp = document.getElementById("supervisor").value;
+    let filtrados = data.filter(r => {
+      return (!p || r["Pais"] === p)
+          && (!sp || r["Supervisor"] === sp)
+          && (!s || r["Sucursal"] === s)
+          && (!w || r["Semana"] === w)
+          && (!sh || r["Nombre"] === sh);
+    });
+    if (!sh) {
+      filtrados = overall.filter(r => {
+        return (!p || r["Pais"] === p)
+            && (!sp || r["Supervisor"] === sp)
+            && (!s || r["Sucursal"] === s)
+            && (!w || r["Semana"] === w);
+      });
+    }
+    const resultado = document.getElementById("resultado");
+    resultado.innerHTML = '';
+    if (filtrados.length === 0) {
+      resultado.innerHTML = '<p>No se encontraron datos con esos filtros.</p>';
+      return;
+    }
+    filtrados.forEach(r => {
+      const div = document.createElement("div");
+      div.className = "card " + getColor(r["Ranking"]);
+      div.innerHTML = `
+        <h3>${r["Nombre"]}</h3>
+        <p class="metric"><strong>Puntaje:</strong> ${r["Puntaje"]}</p>
+        <p class="metric"><strong>Ranking:</strong> ${r["Ranking"]}</p>
+        <p class="metric"><strong>Semana:</strong> ${r["Semana"]}</p>
+        <p class="metric"><strong>Tiempo por orden:</strong> ${r["Tiempo por orden"]}</p>
+        <p class="metric"><strong>%Ordenes tarde:</strong> ${r["%Ordenes que tarde de mas"]}</p>
+        <p class="metric"><strong>%Reemplazos enviados:</strong> ${r["% Reemplazos Enviados"]}</p>
+        <p class="metric"><strong>%Reemplazos aceptados:</strong> ${r["%Reemplazos Aceptados"]}</p>
+        <p class="metric"><strong>%Falta producto:</strong> ${r["%Falta Producto"]}</p>
+        <p class="metric"><strong>%Mal estado:</strong> ${r["%Producto Mal Estado"]}</p>
+        <p class="metric"><strong>%Producto equivocado:</strong> ${r["%Producto Equivocado"]}</p>
+      `;
+      resultado.appendChild(div);
+    });
+  }
+  Papa.parse(urlDATA, {
+    download: true,
+    header: true,
+    complete: res => {
+      data = res.data.filter(r => r["Nombre"]);
+      Papa.parse(urlOVERALL, {
+        download: true,
+        header: true,
+        complete: res2 => {
+          overall = res2.data.filter(r => r["Sucursal"]);
+          cargarFiltros();
+        }
+      });
+    }
+  });
+</script>
+</body>
+</html>
