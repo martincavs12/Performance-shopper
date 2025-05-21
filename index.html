@@ -36,12 +36,12 @@
       border-radius: 10px;
       background: #fff;
     }
-    .card.plata { background: #cfe2f3; }
-    .card.oro { background: #fff4cc; }
-    .card.bronce { background: #f2e2d2; }
-    .card.reentreno { background: #f8d7da; }
-    .metric { margin: 6px 0; }
+    .oro { background: #fff4cc; }
+    .plata { background: #cfe2f3; }
+    .bronce { background: #f2e2d2; }
+    .critico { background: #f8d7da; }
     .hidden { display: none; }
+    strong { display: inline-block; width: 180px; }
   </style>
 </head>
 <body>
@@ -55,15 +55,14 @@
 <div class="container hidden" id="app">
   <h2>Reporte de Performance</h2>
   <label>País</label>
-  <select id="pais"></select>
-  <label>Supervisor</label>
-  <select id="supervisor"></select>
+  <select id="pais"><option value="">Seleccionar</option></select>
   <label>Sucursal</label>
-  <select id="sucursal"></select>
+  <select id="sucursal"><option value="">Seleccionar</option></select>
   <label>Semana</label>
-  <select id="semana"></select>
+  <select id="semana"><option value="">Seleccionar</option></select>
   <label>Shopper</label>
-  <select id="shopper"></select>
+  <select id="shopper"><option value="">Todos</option></select>
+  <p id="mensaje"></p>
   <div id="resultado"></div>
 </div>
 <script>
@@ -79,99 +78,109 @@
       document.getElementById("error").textContent = "Credenciales incorrectas";
     }
   }
-  const urlDATA = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSysN7kitfgQbwz062l0cSfdLmwQMJs-QPHbf8Hxk2nikUylagVMMcb_KZKZynjvQeVzr8l3t-5LGgK/pub?gid=0&single=true&output=csv";
-  const urlOVERALL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSysN7kitfgQbwz062l0cSfdLmwQMJs-QPHbf8Hxk2nikUylagVMMcb_KZKZynjvQeVzr8l3t-5LGgK/pub?gid=187588943&single=true&output=csv";
+  const sheetDataURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSysN7kitfgQbwz062l0cSfdLmwQMJs-QPHbf8Hxk2nikUylagVMMcb_KZKZynjvQeVzr8l3t-5LGgK/pub?gid=0&single=true&output=csv";
+  const sheetOverallURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSysN7kitfgQbwz062l0cSfdLmwQMJs-QPHbf8Hxk2nikUylagVMMcb_KZKZynjvQeVzr8l3t-5LGgK/pub?gid=187588943&single=true&output=csv";
   let data = [], overall = [];
-  function getColor(ranking) {
-    if (!ranking) return '';
-    ranking = ranking.toLowerCase();
-    if (ranking.includes("plata")) return "plata";
-    if (ranking.includes("oro")) return "oro";
-    if (ranking.includes("bronce")) return "bronce";
-    if (ranking.includes("re entrenamiento")) return "reentreno";
+  function filtrarOpciones() {
+    const pais = document.getElementById("pais").value;
+    const sucursal = document.getElementById("sucursal").value;
+    const sucursales = new Set(data.filter(r => r["Pais"] === pais).map(r => r["Sucursal"]));
+    const semanas = new Set(data.filter(r => r["Pais"] === pais && r["Sucursal"] === sucursal).map(r => r["Semana"]));
+    const shoppers = new Set(data.filter(r => r["Pais"] === pais && r["Sucursal"] === sucursal).map(r => r["Nombre"]));
+    actualizarSelect("sucursal", sucursales);
+    actualizarSelect("semana", semanas);
+    actualizarSelect("shopper", shoppers, true);
+  }
+  function actualizarSelect(id, valores, incluirTodos = false) {
+    const el = document.getElementById(id);
+    const actual = el.value;
+    el.innerHTML = incluirTodos ? `<option value="">Todos</option>` : `<option value="">Seleccionar</option>`;
+    [...valores].sort().forEach(v => {
+      const o = document.createElement("option");
+      o.value = v; o.textContent = v;
+      el.appendChild(o);
+    });
+    if ([...valores].includes(actual)) el.value = actual;
+  }
+  function getColor(pos) {
+    if (!pos) return '';
+    pos = pos.toLowerCase();
+    if (pos.includes("plata")) return "plata";
+    if (pos.includes("oro")) return "oro";
+    if (pos.includes("bronce")) return "bronce";
+    if (pos.includes("critico")) return "critico";
     return '';
   }
-  function cargarFiltros() {
-    const sets = { pais: new Set(), supervisor: new Set(), sucursal: new Set(), semana: new Set(), shopper: new Set() };
-    data.forEach(r => {
-      if (r["Pais"]) sets.pais.add(r["Pais"]);
-      if (r["Supervisor"]) sets.supervisor.add(r["Supervisor"]);
-      if (r["Sucursal"]) sets.sucursal.add(r["Sucursal"]);
-      if (r["Semana"]) sets.semana.add(r["Semana"]);
-      if (r["Nombre"]) sets.shopper.add(r["Nombre"]);
-    });
-    Object.entries(sets).forEach(([key, set]) => {
-      const el = document.getElementById(key);
-      el.innerHTML = '<option value="">Todos</option>';
-      [...set].sort().forEach(v => {
-        const opt = document.createElement("option");
-        opt.value = v; opt.textContent = v;
-        el.appendChild(opt);
-      });
-      el.addEventListener("change", mostrarResultados);
-    });
+  function formatearPorcentaje(valor) {
+    const num = parseFloat(valor);
+    return isNaN(num) ? "-" : `${num.toFixed(2)}%`;
   }
   function mostrarResultados() {
-    const p = document.getElementById("pais").value;
-    const s = document.getElementById("sucursal").value;
-    const w = document.getElementById("semana").value;
-    const sh = document.getElementById("shopper").value;
-    const sp = document.getElementById("supervisor").value;
-    let filtrados = data.filter(r => {
-      return (!p || r["Pais"] === p)
-          && (!sp || r["Supervisor"] === sp)
-          && (!s || r["Sucursal"] === s)
-          && (!w || r["Semana"] === w)
-          && (!sh || r["Nombre"] === sh);
-    });
-    if (!sh) {
-      filtrados = overall.filter(r => {
-        return (!p || r["Pais"] === p)
-            && (!sp || r["Supervisor"] === sp)
-            && (!s || r["Sucursal"] === s)
-            && (!w || r["Semana"] === w);
-      });
-    }
-    const resultado = document.getElementById("resultado");
-    resultado.innerHTML = '';
-    if (filtrados.length === 0) {
-      resultado.innerHTML = '<p>No se encontraron datos con esos filtros.</p>';
+    const pais = document.getElementById("pais").value;
+    const sucursal = document.getElementById("sucursal").value;
+    const semana = document.getElementById("semana").value;
+    const shopper = document.getElementById("shopper").value;
+    const cont = document.getElementById("resultado");
+    const msg = document.getElementById("mensaje");
+    cont.innerHTML = "";
+    msg.textContent = "";
+    if (!pais || !sucursal || !semana) {
+      msg.textContent = "Completá país, sucursal y semana para ver resultados.";
       return;
     }
-    filtrados.forEach(r => {
-      const div = document.createElement("div");
-      div.className = "card " + getColor(r["Ranking"]);
-      div.innerHTML = `
-        <h3>${r["Nombre"]}</h3>
-        <p class="metric"><strong>Puntaje:</strong> ${r["Puntaje"]}</p>
-        <p class="metric"><strong>Ranking:</strong> ${r["Ranking"]}</p>
-        <p class="metric"><strong>Semana:</strong> ${r["Semana"]}</p>
-        <p class="metric"><strong>Tiempo por orden:</strong> ${r["Tiempo por orden"]}</p>
-        <p class="metric"><strong>%Ordenes tarde:</strong> ${r["%Ordenes que tarde de mas"]}</p>
-        <p class="metric"><strong>%Reemplazos enviados:</strong> ${r["% Reemplazos Enviados"]}</p>
-        <p class="metric"><strong>%Reemplazos aceptados:</strong> ${r["%Reemplazos Aceptados"]}</p>
-        <p class="metric"><strong>%Falta producto:</strong> ${r["%Falta Producto"]}</p>
-        <p class="metric"><strong>%Mal estado:</strong> ${r["%Producto Mal Estado"]}</p>
-        <p class="metric"><strong>%Producto equivocado:</strong> ${r["%Producto Equivocado"]}</p>
-      `;
-      resultado.appendChild(div);
+    const overallRow = overall.find(r => r["Pais"] === pais && r["Sucursal"] === sucursal && r["Semana"] === semana);
+    if (overallRow) cont.appendChild(crearCard(overallRow, "TIENDA"));
+    const filtrados = data.filter(r =>
+      r["Pais"] === pais && r["Sucursal"] === sucursal && r["Semana"] === semana &&
+      (shopper === "" || r["Nombre"] === shopper)
+    );
+    filtrados.forEach(r => cont.appendChild(crearCard(r, r["Nombre"])));
+  }
+  function crearCard(r, titulo) {
+    const div = document.createElement("div");
+    div.className = "card " + getColor(r["Posicion"]);
+    div.innerHTML = `
+      <h3>${titulo}</h3>
+      <p><strong>Puntaje:</strong> ${formatearPorcentaje(r["Puntaje"])}</p>
+      <p><strong>Posición:</strong> ${r["Posicion"]}</p>
+      <p><strong>Semana:</strong> ${r["Semana"]}</p>
+      <p><strong>Ordenes:</strong> ${r["Ordenes"]}</p>
+      <p><strong>Tiempo por orden:</strong> ${parseFloat(r["Tiempo por orden"] || 0).toFixed(2)}</p>
+      <p><strong>%Ordenes tarde:</strong> ${formatearPorcentaje(r["%Ordenes que tarde de mas"])}</p>
+      <p><strong>%Reemplazos enviados:</strong> ${formatearPorcentaje(r["% Reemplazos Enviados"])}</p>
+      <p><strong>%Reemplazos aceptados:</strong> ${formatearPorcentaje(r["%Reemplazos Aceptados"])}</p>
+      <p><strong>%Falta producto:</strong> ${formatearPorcentaje(r["%Falta Producto"])}</p>
+      <p><strong>%Mal estado:</strong> ${formatearPorcentaje(r["%Producto Mal Estado"])}</p>
+      <p><strong>%Producto equivocado:</strong> ${formatearPorcentaje(r["%Producto Equivocado"])}</p>
+      <p><strong>Puntos a Mejorar:</strong> ${r["Puntos a Mejorar"] || "-"}</p>
+    `;
+    return div;
+  }
+  function cargarDatos() {
+    Papa.parse(sheetDataURL, {
+      download: true,
+      header: true,
+      complete: function(res1) {
+        data = res1.data.filter(r => r["Nombre"]);
+        Papa.parse(sheetOverallURL, {
+          download: true,
+          header: true,
+          complete: function(res2) {
+            overall = res2.data;
+            const paises = [...new Set(data.map(r => r["Pais"]))];
+            actualizarSelect("pais", paises);
+            ["pais", "sucursal", "semana", "shopper"].forEach(id => {
+              document.getElementById(id).addEventListener("change", () => {
+                filtrarOpciones();
+                mostrarResultados();
+              });
+            });
+          }
+        });
+      }
     });
   }
-  Papa.parse(urlDATA, {
-    download: true,
-    header: true,
-    complete: res => {
-      data = res.data.filter(r => r["Nombre"]);
-      Papa.parse(urlOVERALL, {
-        download: true,
-        header: true,
-        complete: res2 => {
-          overall = res2.data.filter(r => r["Sucursal"]);
-          cargarFiltros();
-        }
-      });
-    }
-  });
+  window.onload = cargarDatos;
 </script>
 </body>
 </html>
