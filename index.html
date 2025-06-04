@@ -55,7 +55,7 @@
 <div class="container hidden" id="app">
   <h2>Reporte de Performance</h2>
   <label>País</label>
-  <select id="pais"><option value="">Seleccionar</option></select>
+  <select id="pais" disabled><option value="">Seleccionar</option></select>
   <label>Sucursal</label>
   <select id="sucursal"><option value="">Seleccionar</option></select>
   <label>Semana</label>
@@ -66,14 +66,25 @@
   <div id="resultado"></div>
 </div>
 <script>
-  const USER = "reporte";
-  const PASS = "reporte";
+  const USERS = {
+    "argentina": { user: "arg", pass: "arg" },
+    "bolivia": { user: "bol", pass: "bol" },
+    "guatemala": { user: "gua", pass: "gua" },
+    "honduras": { user: "hon", pass: "hon" },
+    "panamá": { user: "pan", pass: "pan" },
+    "perú": { user: "per", pass: "per" },
+    "república dominicana": { user: "rep", pass: "rep" }
+  };
+  let userPais = "";
   function validarLogin() {
-    const u = document.getElementById("usuario").value;
-    const p = document.getElementById("contrasena").value;
-    if (u === USER && p === PASS) {
+    const u = document.getElementById("usuario").value.toLowerCase();
+    const p = document.getElementById("contrasena").value.toLowerCase();
+    const found = Object.entries(USERS).find(([pais, cred]) => cred.user === u && cred.pass === p);
+    if (found) {
+      userPais = found[0].charAt(0).toUpperCase() + found[0].slice(1);
       document.getElementById("login").classList.add("hidden");
       document.getElementById("app").classList.remove("hidden");
+      cargarDatos();
     } else {
       document.getElementById("error").textContent = "Credenciales incorrectas";
     }
@@ -82,14 +93,11 @@
   const sheetOverallURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSysN7kitfgQbwz062l0cSfdLmwQMJs-QPHbf8Hxk2nikUylagVMMcb_KZKZynjvQeVzr8l3t-5LGgK/pub?gid=187588943&single=true&output=csv";
   let data = [], overall = [];
   function filtrarOpciones() {
-    const pais = document.getElementById("pais").value;
-    const sucursal = document.getElementById("sucursal").value;
-    const sucursales = new Set(data.filter(r => r["Pais"] === pais).map(r => r["Sucursal"]));
-    const semanas = new Set(data.filter(r => r["Pais"] === pais && r["Sucursal"] === sucursal).map(r => r["Semana"]));
-    const shoppers = new Set(data.filter(r => r["Pais"] === pais && r["Sucursal"] === sucursal).map(r => r["Nombre"]));
+    document.getElementById("pais").innerHTML = `<option>${userPais}</option>`;
+    const sucursales = new Set(data.filter(r => r["Pais"] === userPais).map(r => r["Sucursal"]));
+    const semanas = new Set(data.filter(r => r["Pais"] === userPais).map(r => r["Semana"]));
     actualizarSelect("sucursal", sucursales);
     actualizarSelect("semana", semanas);
-    actualizarSelect("shopper", shoppers, true);
   }
   function actualizarSelect(id, valores, incluirTodos = false) {
     const el = document.getElementById(id);
@@ -111,12 +119,8 @@
     if (pos.includes("critico")) return "critico";
     return '';
   }
-  function formatearPorcentaje(valor) {
-    const num = parseFloat(valor);
-    return isNaN(num) ? "-" : `${num.toFixed(2)}%`;
-  }
   function mostrarResultados() {
-    const pais = document.getElementById("pais").value;
+    const pais = userPais;
     const sucursal = document.getElementById("sucursal").value;
     const semana = document.getElementById("semana").value;
     const shopper = document.getElementById("shopper").value;
@@ -124,8 +128,8 @@
     const msg = document.getElementById("mensaje");
     cont.innerHTML = "";
     msg.textContent = "";
-    if (!pais || !sucursal || !semana) {
-      msg.textContent = "Completá país, sucursal y semana para ver resultados.";
+    if (!sucursal || !semana) {
+      msg.textContent = "Completá sucursal y semana para ver resultados.";
       return;
     }
     const overallRow = overall.find(r => r["Pais"] === pais && r["Sucursal"] === sucursal && r["Semana"] === semana);
@@ -134,6 +138,8 @@
       r["Pais"] === pais && r["Sucursal"] === sucursal && r["Semana"] === semana &&
       (shopper === "" || r["Nombre"] === shopper)
     );
+    const shoppers = new Set(filtrados.map(r => r["Nombre"]));
+    actualizarSelect("shopper", shoppers, true);
     filtrados.forEach(r => cont.appendChild(crearCard(r, r["Nombre"])));
   }
   function crearCard(r, titulo) {
@@ -141,18 +147,17 @@
     div.className = "card " + getColor(r["Posicion"]);
     div.innerHTML = `
       <h3>${titulo}</h3>
-      <p><strong>Puntaje:</strong> ${formatearPorcentaje(r["Puntaje"])}</p>
+      <p><strong>Puntaje:</strong> ${r["Puntaje"] || "-"}</p>
+      <p><strong>Puntos a Mejorar:</strong> ${r["Puntos a Mejorar"] || "-"}</p>
       <p><strong>Posición:</strong> ${r["Posicion"]}</p>
       <p><strong>Semana:</strong> ${r["Semana"]}</p>
-      <p><strong>Ordenes:</strong> ${r["Ordenes"]}</p>
       <p><strong>Tiempo por orden:</strong> ${parseFloat(r["Tiempo por orden"] || 0).toFixed(2)}</p>
-      <p><strong>%Ordenes tarde:</strong> ${formatearPorcentaje(r["%Ordenes que tarde de mas"])}</p>
-      <p><strong>%Reemplazos enviados:</strong> ${formatearPorcentaje(r["% Reemplazos Enviados"])}</p>
-      <p><strong>%Reemplazos aceptados:</strong> ${formatearPorcentaje(r["%Reemplazos Aceptados"])}</p>
-      <p><strong>%Falta producto:</strong> ${formatearPorcentaje(r["%Falta Producto"])}</p>
-      <p><strong>%Mal estado:</strong> ${formatearPorcentaje(r["%Producto Mal Estado"])}</p>
-      <p><strong>%Producto equivocado:</strong> ${formatearPorcentaje(r["%Producto Equivocado"])}</p>
-      <p><strong>Puntos a Mejorar:</strong> ${r["Puntos a Mejorar"] || "-"}</p>
+      <p><strong>%Ordenes tarde:</strong> ${r["%Ordenes que tarde de mas"]}</p>
+      <p><strong>%Reemplazos enviados:</strong> ${r["% Reemplazos Enviados"]}</p>
+      <p><strong>%Reemplazos aceptados:</strong> ${r["%Reemplazos Aceptados"]}</p>
+      <p><strong>%Falta producto:</strong> ${r["%Falta Producto"]}</p>
+      <p><strong>%Mal estado:</strong> ${r["%Producto Mal Estado"]}</p>
+      <p><strong>%Producto equivocado:</strong> ${r["%Producto Equivocado"]}</p>
     `;
     return div;
   }
@@ -167,20 +172,15 @@
           header: true,
           complete: function(res2) {
             overall = res2.data;
-            const paises = [...new Set(data.map(r => r["Pais"]))];
-            actualizarSelect("pais", paises);
-            ["pais", "sucursal", "semana", "shopper"].forEach(id => {
-              document.getElementById(id).addEventListener("change", () => {
-                filtrarOpciones();
-                mostrarResultados();
-              });
+            filtrarOpciones();
+            ["sucursal", "semana", "shopper"].forEach(id => {
+              document.getElementById(id).addEventListener("change", mostrarResultados);
             });
           }
         });
       }
     });
   }
-  window.onload = cargarDatos;
 </script>
 </body>
 </html>
