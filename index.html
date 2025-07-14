@@ -1,186 +1,527 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <title>Reporte de Performance - PedidosYa</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap" rel="stylesheet" />
-  <style>
-    body {
-      font-family: 'Outfit', sans-serif;
-      margin: 0;
-      background: #f4f4f4;
-      color: #100423;
-    }
-    .container {
-      max-width: 960px;
-      margin: 2rem auto;
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-    }
-    h2 {
-      color: #ea044e;
-    }
-    select, input, button {
-      width: 100%;
-      margin: 10px 0;
-      padding: 10px;
-      font-family: inherit;
-    }
-    .card {
-      border: 2px solid #ccc;
-      padding: 20px;
-      margin: 20px 0;
-      border-radius: 10px;
-      background: #fff;
-    }
-    .oro { background: #fff4cc; }
-    .plata { background: #cfe2f3; }
-    .bronce { background: #f2e2d2; }
-    .critico { background: #f8d7da; }
-    .hidden { display: none; }
-    strong { display: inline-block; width: 180px; }
-  </style>
+    <meta charset="UTF-8" />
+    <title>Reporte de Performance - PedidosYa</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+    <style>
+        body {
+            font-family: 'Outfit', sans-serif;
+            margin: 0;
+            background: #f4f4f4;
+            color: #100423;
+        }
+        .container {
+            max-width: 960px;
+            margin: 2rem auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        h2 {
+            color: #ea044e;
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        label {
+            display: block;
+            margin-top: 15px;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+        }
+        select, input, button {
+            width: calc(100% - 22px);
+            margin: 10px 0;
+            padding: 10px;
+            font-family: inherit;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        button {
+            background: #ea044e;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: background 0.3s ease;
+        }
+        button:hover {
+            background: #d40344;
+        }
+        .card {
+            border: 2px solid #ccc;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            background: #fff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .oro { background: #fff4cc; border-color: #ffcc00; }
+        .plata { background: #cfe2f3; border-color: #6cbde2; }
+        .bronce { background: #f2e2d2; border-color: #d18d42; }
+        .critico { background: #f8d7da; border-color: #dc3545; }
+        .hidden { display: none; }
+        strong { display: inline-block; width: 180px; }
+        h3 {
+            color: #100423;
+            margin-top: 0;
+            margin-bottom: 1em;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        h4 {
+            margin-top: 1.5em;
+            margin-bottom: 0.5em;
+            color: #000;
+            font-size: 1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            border-bottom: 2px solid #000;
+            padding-bottom: 4px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+        table th, table td {
+            border: 1px solid #ddd;
+            padding: 12px 8px;
+            text-align: center;
+            vertical-align: middle;
+        }
+        table th {
+            background: #e9ecef;
+            font-weight: 700;
+            color: #495057;
+        }
+        table tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        table tr:hover {
+            background-color: #f1f1f1;
+        }
+        #mensaje {
+            color: #ea044e;
+            text-align: center;
+            font-weight: 600;
+            margin-top: 15px;
+        }
+    </style>
 </head>
 <body>
-<div class="container" id="login">
-  <h2>Acceso</h2>
-  <input type="text" id="usuario" placeholder="Usuario" />
-  <input type="password" id="contrasena" placeholder="Contraseña" />
-  <button onclick="validarLogin()">Ingresar</button>
-  <p id="error" style="color: red;"></p>
-</div>
-<div class="container hidden" id="app">
-  <h2>Reporte de Performance</h2>
-  <label>País</label>
-  <select id="pais" disabled><option value="">Seleccionar</option></select>
-  <label>Sucursal</label>
-  <select id="sucursal"><option value="">Seleccionar</option></select>
-  <label>Semana</label>
-  <select id="semana"><option value="">Seleccionar</option></select>
-  <label>Shopper</label>
-  <select id="shopper"><option value="">Todos</option></select>
-  <p id="mensaje"></p>
-  <div id="resultado"></div>
-</div>
-<script>
-  const USERS = {
-    "argentina": { user: "arg", pass: "arg" },
-    "bolivia": { user: "bol", pass: "bol" },
-    "guatemala": { user: "gua", pass: "gua" },
-    "honduras": { user: "hon", pass: "hon" },
-    "panamá": { user: "pan", pass: "pan" },
-    "perú": { user: "per", pass: "per" },
-    "república dominicana": { user: "rep", pass: "rep" }
-  };
-  let userPais = "";
-  function validarLogin() {
-    const u = document.getElementById("usuario").value.toLowerCase();
-    const p = document.getElementById("contrasena").value.toLowerCase();
-    const found = Object.entries(USERS).find(([pais, cred]) => cred.user === u && cred.pass === p);
-    if (found) {
-      userPais = found[0].charAt(0).toUpperCase() + found[0].slice(1);
-      document.getElementById("login").classList.add("hidden");
-      document.getElementById("app").classList.remove("hidden");
-      cargarDatos();
-    } else {
-      document.getElementById("error").textContent = "Credenciales incorrectas";
-    }
-  }
-  const sheetDataURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSysN7kitfgQbwz062l0cSfdLmwQMJs-QPHbf8Hxk2nikUylagVMMcb_KZKZynjvQeVzr8l3t-5LGgK/pub?gid=0&single=true&output=csv";
-  const sheetOverallURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSysN7kitfgQbwz062l0cSfdLmwQMJs-QPHbf8Hxk2nikUylagVMMcb_KZKZynjvQeVzr8l3t-5LGgK/pub?gid=187588943&single=true&output=csv";
-  let data = [], overall = [];
-  function filtrarOpciones() {
-    document.getElementById("pais").innerHTML = `<option>${userPais}</option>`;
-    const sucursales = new Set(data.filter(r => r["Pais"] === userPais).map(r => r["Sucursal"]));
-    const semanas = new Set(data.filter(r => r["Pais"] === userPais).map(r => r["Semana"]));
-    actualizarSelect("sucursal", sucursales);
-    actualizarSelect("semana", semanas);
-  }
-  function actualizarSelect(id, valores, incluirTodos = false) {
-    const el = document.getElementById(id);
-    const actual = el.value;
-    el.innerHTML = incluirTodos ? `<option value="">Todos</option>` : `<option value="">Seleccionar</option>`;
-    [...valores].sort().forEach(v => {
-      const o = document.createElement("option");
-      o.value = v; o.textContent = v;
-      el.appendChild(o);
-    });
-    if ([...valores].includes(actual)) el.value = actual;
-  }
-  function getColor(pos) {
-    if (!pos) return '';
-    pos = pos.toLowerCase();
-    if (pos.includes("plata")) return "plata";
-    if (pos.includes("oro")) return "oro";
-    if (pos.includes("bronce")) return "bronce";
-    if (pos.includes("critico")) return "critico";
-    return '';
-  }
-  function mostrarResultados() {
-    const pais = userPais;
-    const sucursal = document.getElementById("sucursal").value;
-    const semana = document.getElementById("semana").value;
-    const shopper = document.getElementById("shopper").value;
-    const cont = document.getElementById("resultado");
-    const msg = document.getElementById("mensaje");
-    cont.innerHTML = "";
-    msg.textContent = "";
-    if (!sucursal || !semana) {
-      msg.textContent = "Completá sucursal y semana para ver resultados.";
-      return;
-    }
-    const overallRow = overall.find(r => r["Pais"] === pais && r["Sucursal"] === sucursal && r["Semana"] === semana);
-    if (overallRow) cont.appendChild(crearCard(overallRow, "TIENDA"));
-    const filtrados = data.filter(r =>
-      r["Pais"] === pais && r["Sucursal"] === sucursal && r["Semana"] === semana &&
-      (shopper === "" || r["Nombre"] === shopper)
-    );
-    const shoppers = new Set(filtrados.map(r => r["Nombre"]));
-    actualizarSelect("shopper", shoppers, true);
-    filtrados.forEach(r => cont.appendChild(crearCard(r, r["Nombre"])));
-  }
-  function crearCard(r, titulo) {
-    const div = document.createElement("div");
-    div.className = "card " + getColor(r["Posicion"]);
-    div.innerHTML = `
-      <h3>${titulo}</h3>
-      <p><strong>Puntaje:</strong> ${r["Puntaje"] || "-"}</p>
-      <p><strong>Posición:</strong> ${r["Posicion"]}</p>
-      <p><strong>Puntos a Mejorar:</strong> ${r["Puntos a Mejorar"] || "-"}</p>
-      <p><strong>Semana:</strong> ${r["Semana"]}</p>
-      <p><strong>Tiempo por orden:</strong> ${parseFloat(r["Tiempo por orden"] || 0).toFixed(2)}</p>
-      <p><strong>%Ordenes tarde:</strong> ${r["%Ordenes que tarde de mas"]}</p>
-      <p><strong>%Reemplazos enviados:</strong> ${r["% Reemplazos Enviados"]}</p>
-      <p><strong>%Reemplazos aceptados:</strong> ${r["%Reemplazos Aceptados"]}</p>
-      <p><strong>%Falta producto:</strong> ${r["%Falta Producto"]}</p>
-      <p><strong>%Producto en mal estado:</strong> ${r["%Producto Mal Estado"]}</p>
-      <p><strong>%Producto equivocado:</strong> ${r["%Producto Equivocado"]}</p>
-    `;
-    return div;
-  }
-  function cargarDatos() {
-    Papa.parse(sheetDataURL, {
-      download: true,
-      header: true,
-      complete: function(res1) {
-        data = res1.data.filter(r => r["Nombre"]);
-        Papa.parse(sheetOverallURL, {
-          download: true,
-          header: true,
-          complete: function(res2) {
-            overall = res2.data;
-            filtrarOpciones();
-            ["sucursal", "semana", "shopper"].forEach(id => {
-              document.getElementById(id).addEventListener("change", mostrarResultados);
+    <div class="container" id="login">
+        <h2>Acceso al Reporte</h2>
+        <input type="text" id="usuario" placeholder="Usuario" />
+        <input type="password" id="contrasena" placeholder="Contraseña" />
+        <button onclick="validarLogin()">Ingresar</button>
+        <p id="error" style="color: red; text-align: center; margin-top: 10px;"></p>
+    </div>
+
+    <div class="container hidden" id="app">
+        <h2>Reporte de Performance</h2>
+        <label for="pais">País</label>
+        <select id="pais" disabled><option value="">Seleccionar</option></select>
+        
+        <label for="franquicia">Franquicia</label>
+        <select id="franquicia"><option value="">Seleccionar</option></select>
+        
+        <label for="sucursal">Sucursal</label>
+        <select id="sucursal"><option value="">Seleccionar</option></select>
+        
+        <label for="semana">Semana</label>
+        <select id="semana"><option value="">Seleccionar</option></select>
+        
+        <label for="shopper">Shopper</label>
+        <select id="shopper"><option value="">Todos</option></select>
+        
+        <p id="mensaje"></p>
+        
+        <div id="cortes"></div>
+
+        <div id="overallScore" class="card hidden"></div>
+
+        <div id="resultado"></div>
+    </div>
+
+    <script>
+        let userPaisDisplayName = ""; 
+        let userPaisNormalized = ""; 
+        let data = [], overall = [], clusterData = [];
+
+        function normalizeString(str) {
+            if (typeof str !== 'string') return '';
+            return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+        }
+
+        const USERS = {
+            "argentina": { user: "arg", pass: "arg" },
+            "bolivia": { user: "bol", pass: "bol" },
+            "guatemala": { user: "gua", pass: "gua" },
+            "honduras": { user: "hon", pass: "hon" },
+            "panamá": { user: "pan", pass: "pan" },
+            "perú": { user: "per", pass: "per" },
+            "República Dominicana": { user: "rep", pass: "rep" }
+        };
+
+        function validarLogin() {
+            const u = document.getElementById("usuario").value.toLowerCase();
+            const p = document.getElementById("contrasena").value.toLowerCase();
+            
+            const found = Object.entries(USERS).find(([paisKey, cred]) => {
+                return normalizeString(cred.user) === normalizeString(u) && normalizeString(cred.pass) === normalizeString(p);
             });
-          }
-        });
-      }
-    });
-  }
-</script>
+
+            if (found) {
+                userPaisDisplayName = found[0]; 
+                userPaisNormalized = normalizeString(found[0]); 
+
+                document.getElementById("login").classList.add("hidden");
+                document.getElementById("app").classList.remove("hidden");
+                
+                document.getElementById("pais").innerHTML = `<option value="${userPaisDisplayName}">${userPaisDisplayName}</option>`;
+                
+                cargarDatos();
+            } else {
+                document.getElementById("error").textContent = "Credenciales incorrectas";
+            }
+        }
+
+        function aplicarFiltros() {
+            const franquicia = document.getElementById("franquicia").value;
+            const sucursal = document.getElementById("sucursal").value;
+            const semana = document.getElementById("semana").value;
+            const shopper = document.getElementById("shopper").value;
+            
+            const normalizedFranquicia = normalizeString(franquicia);
+            const normalizedSucursal = normalizeString(sucursal);
+            const normalizedSemana = normalizeString(semana);
+            const normalizedShopper = normalizeString(shopper);
+            
+            const filteredDataForFranchise = data.filter(r => r.country_name === userPaisNormalized);
+            const franquicias = new Set(filteredDataForFranchise.map(r => r.franchise_name_display).filter(Boolean));
+            actualizarSelect("franquicia", franquicias);
+
+            const filteredDataForSucursal = filteredDataForFranchise.filter(r =>
+                (!franquicia || r.franchise_name === normalizedFranquicia)
+            );
+            const sucursales = new Set(filteredDataForSucursal.map(r => r.partner_name_display).filter(Boolean));
+            actualizarSelect("sucursal", sucursales);
+
+            const filteredDataForSemana = filteredDataForSucursal.filter(r =>
+                (!sucursal || r.partner_name === normalizedSucursal)
+            );
+            const semanas = new Set(filteredDataForSemana.map(r => r.semana_display).filter(Boolean));
+            actualizarSelect("semana", semanas);
+
+            const filteredDataForShopper = filteredDataForSemana.filter(r =>
+                (!semana || r.semana === normalizedSemana)
+            );
+            const shoppers = new Set(filteredDataForShopper.map(r => r.shopper_name_display).filter(Boolean));
+            actualizarSelect("shopper", shoppers, true);
+
+            mostrarCortes();
+            mostrarResultados();
+        }
+
+        function actualizarSelect(id, valores, incluirTodos = false) {
+            const el = document.getElementById(id);
+            const actualValue = el.value;
+            const normalizedActualValue = normalizeString(actualValue);
+            
+            el.innerHTML = incluirTodos ? `<option value="">Todos</option>` : `<option value="">Seleccionar</option>`;
+            
+            [...valores].sort((a, b) => {
+                const numA = parseFloat(a);
+                const numB = parseFloat(b);
+                if (!isNaN(numA) && !isNaN(numB)) {
+                    return numA - numB;
+                }
+                return a.localeCompare(b, undefined, {sensitivity: 'base'});
+            }).forEach(v => {
+                const o = document.createElement("option");
+                o.value = v; 
+                o.textContent = v;
+                el.appendChild(o);
+            });
+            
+            const optionExists = Array.from(el.options).some(opt => normalizeString(opt.value) === normalizedActualValue);
+            
+            if (optionExists) {
+                el.value = actualValue;
+            } else if (incluirTodos && normalizedActualValue === '') {
+                el.value = "";
+            } else {
+                el.value = el.options[0].value;
+            }
+        }
+
+        function mostrarResultados() {
+            const franquicia = document.getElementById("franquicia").value;
+            const sucursal = document.getElementById("sucursal").value;
+            const semana = document.getElementById("semana").value;
+            const shopper = document.getElementById("shopper").value;
+
+            const cont = document.getElementById("resultado");
+            const msg = document.getElementById("mensaje");
+            const overallScoreDiv = document.getElementById("overallScore");
+            
+            cont.innerHTML = "";
+            msg.textContent = "";
+            overallScoreDiv.classList.add("hidden");
+
+            const normalizedFranquicia = normalizeString(franquicia);
+            const normalizedSucursal = normalizeString(sucursal);
+            const normalizedSemana = normalizeString(semana);
+            const normalizedShopper = normalizeString(shopper);
+
+            if (!sucursal || !semana) {
+                msg.textContent = "Completá los filtros de Sucursal y Semana para ver resultados.";
+                return;
+            }
+
+            const storeOverall = overall.find(r =>
+                r.country_name === userPaisNormalized &&
+                r.partner_name === normalizedSucursal &&
+                r.semana === normalizedSemana &&
+                (!franquicia || r.franchise_name === normalizedFranquicia)
+            );
+
+            if (storeOverall) {
+                overallScoreDiv.innerHTML = `
+                <h3>Puntaje General de la Tienda (${storeOverall.partner_name_display || '-'})</h3>
+                <p><strong>Puntaje:</strong> ${storeOverall.shopper_scoring_display || '-'}</p>
+                <p><strong>Posición:</strong> ${storeOverall.cluster_name_final_display || '-'}</p>
+                <p><strong>Órdenes canceladas:</strong> ${storeOverall.VFR_display || '-'}</p>
+                <p><strong>Oportunidad de Mejora:</strong> ${storeOverall.oportunidad_de_mejora_display || '-'}</p>
+                
+                <h4>TIEMPOS</h4>
+                <p><strong>Puntaje Tiempos:</strong> ${storeOverall.timing_compliance_display || '-'}</p>
+                <p><strong>Tiempo por orden:</strong> ${storeOverall.picking_time_display || '-'}</p>
+                <p><strong>%Órdenes tarde:</strong> ${storeOverall.picking_late_display || '-'}</p>
+                <p><strong>Tiempo en encontrar primer item:</strong> ${storeOverall.first_prod_time_display || '-'}</p>
+                <p><strong>%Primer item encontrado > 3':</strong> ${storeOverall.first_prod_late_display || '-'}</p>
+                
+                <h4>PICKING</h4>
+                <p><strong>Puntaje Picking:</strong> ${storeOverall.picking_compliance_display || '-'}</p>
+                <p><strong>%Cancelaciones por falta de producto:</strong> ${storeOverall.OOS_FR_display || '-'}</p>
+                <p><strong>%Productos no encontrados:</strong> ${storeOverall.not_found_rate_display || '-'}</p>
+                <p><strong>%Reemplazos enviados:</strong> ${storeOverall.rep_sent_display || '-'}</p>
+                <p><strong>%Reemplazos aceptados:</strong> ${storeOverall.rep_rate_display || '-'}</p>
+                
+                <h4>CALIDAD</h4>
+                <p><strong>Puntaje Calidad:</strong> ${storeOverall.quality_compliance_display || '-'}</p>
+                <p><strong>%Falta producto:</strong> ${storeOverall.missing_item_display || '-'}</p>
+                <p><strong>%Producto en mal estado:</strong> ${storeOverall.prod_quality_display || '-'}</p>
+                <p><strong>%Producto equivocado:</strong> ${storeOverall.wrong_item_display || '-'}</p>
+              `;
+                overallScoreDiv.classList.remove("hidden");
+                overallScoreDiv.classList.remove("oro", "plata", "bronce", "critico");
+                overallScoreDiv.classList.add(getColor(storeOverall.cluster_name_final_display));
+            } else {
+                overallScoreDiv.classList.add("hidden");
+            }
+
+            const filtrados = data.filter(r => {
+                return r.country_name === userPaisNormalized &&
+                       (!franquicia || r.franchise_name === normalizedFranquicia) &&
+                       r.partner_name === normalizedSucursal &&
+                       r.semana === normalizedSemana &&
+                       (shopper === "" || r.shopper_name === normalizedShopper);
+            });
+
+            if (filtrados.length === 0 && !storeOverall) {
+                msg.textContent = "No se encontraron resultados para los filtros seleccionados.";
+                return;
+            }
+
+            if (shopper !== "") {
+              const shopperData = filtrados.find(r => r.shopper_name === normalizedShopper);
+              if (shopperData) {
+                cont.appendChild(crearCard(shopperData, shopperData.shopper_name_display));
+              } else {
+                msg.textContent = "No se encontraron datos para el shopper seleccionado.";
+              }
+            } else {
+              filtrados.forEach(r => cont.appendChild(crearCard(r, r.shopper_name_display)));
+            }
+        }
+
+        function crearCard(r, titulo) {
+            const div = document.createElement("div");
+            div.className = "card " + getColor(r.cluster_name_final_display); 
+            div.innerHTML = `
+                <h3>${titulo || '-'}</h3>
+                <p><strong>Puntaje:</strong> ${r.shopper_scoring_display || '-'}</p>
+                <p><strong>Posición:</strong> ${r.cluster_name_final_display || '-'}</p>
+                <p><strong>Puntos a Mejorar:</strong> ${r.oportunidad_de_mejora_display || '-'}</p>
+                <p><strong>Semana:</strong> ${r.semana_display || '-'}</p>
+
+                <h4>TIEMPOS</h4>
+                <p><strong>Puntaje Tiempos:</strong> ${r.timing_compliance_display || '-'}</p>
+                <p><strong>Tiempo por orden:</strong> ${r.picking_time_display || '-'}</p>
+                <p><strong>%Órdenes tarde:</strong> ${r.picking_late_display || '-'}</p>
+                <p><strong>Tiempo en encontrar primer item:</strong> ${r.first_prod_time_display || '-'}</p>
+                <p><strong>%Primer item encontrado > 3':</strong> ${r.first_prod_late_display || '-'}</p>
+
+                <h4>PICKING</h4>
+                <p><strong>Puntaje Picking:</strong> ${r.picking_compliance_display || '-'}</p>
+                <p><strong>%Cancelaciones por falta de producto:</strong> ${r.OOS_FR_display || '-'}</p>
+                <p><strong>%Productos no encontrados:</strong> ${r.not_found_rate_display || '-'}</p>
+                <p><strong>%Reemplazos enviados:</strong> ${r.rep_sent_display || '-'}</p>
+                <p><strong>%Reemplazos aceptados:</strong> ${r.rep_rate_display || '-'}</p>
+
+                <h4>CALIDAD</h4>
+                <p><strong>Puntaje Calidad:</strong> ${r.quality_compliance_display || '-'}</p>
+                <p><strong>%Falta producto:</strong> ${r.missing_item_display || '-'}</p>
+                <p><strong>%Producto en mal estado:</strong> ${r.prod_quality_display || '-'}</p>
+                <p><strong>%Producto equivocado:</strong> ${r.wrong_item_display || '-'}</p>
+            `;
+            return div;
+        }
+
+        function getColor(pos) {
+            if (!pos) return '';
+            const normalizedPos = normalizeString(pos);
+            if (normalizedPos.includes("plata")) return "plata";
+            if (normalizedPos.includes("oro")) return "oro";
+            if (normalizedPos.includes("bronce")) return "bronce";
+            if (normalizedPos.includes("critico")) return "critico";
+            return '';
+        }
+
+        function mostrarCortes() {
+            const franquicia = document.getElementById("franquicia").value;
+            const cont = document.getElementById("cortes");
+            cont.innerHTML = "";
+
+            if (!userPaisNormalized) return;
+
+            let rows = [];
+            let title = "";
+            const normalizedFranquicia = normalizeString(franquicia);
+
+            if (franquicia) { 
+                rows = clusterData.filter(r => 
+                    r.country_name === userPaisNormalized && 
+                    r.franchise_name === normalizedFranquicia
+                );
+                title = `Condiciones por Posición (${franquicia})`;
+            }
+
+            if (rows.length === 0) {
+                rows = clusterData.filter(r => 
+                    r.country_name === userPaisNormalized && 
+                    (!r.franchise_name || r.franchise_name === '')
+                ); 
+                title = `Condiciones por Posición (${userPaisDisplayName})`; 
+            }
+
+            if (!rows.length) {
+                cont.innerHTML = "<p>No se encontraron condiciones de cortes para este país o franquicia.</p>";
+                return;
+            }
+
+            let html = `<h3>${title}</h3>`;
+            html += `<table style="width:100%;">
+                <thead>
+                    <tr>
+                        <th>Posición</th>
+                        <th>Puntaje</th>
+                        <th>Tiempos Mínimo</th>
+                        <th>Picking Mínimo</th>
+                        <th>Calidad Mínimo</th>
+                    </tr>
+                </thead><tbody>`;
+            rows.forEach(r => {
+                html += `<tr>
+                    <td>${r.cluster_name_display || '-'}</td>
+                    <td>${(r.lower_bound_display !== undefined && r.lower_bound_display !== null ? r.lower_bound_display : '-')} - ${(r.upper_bound_display !== undefined && r.upper_bound_display !== null ? r.upper_bound_display : '-')}</td>
+                    <td>${r.min_timing_compliance_display || '-'}</td>
+                    <td>${r.min_picking_compliance_display || '-'}</td>
+                    <td>${r.min_quality_compliance_display || '-'}</td>
+                </tr>`;
+            });
+            html += `</tbody></table>`;
+            cont.innerHTML = html;
+        }
+
+        function cargarDatos() {
+            const sheetDataURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTKhDRhEqo0oy2pFwesdUZaMFTD5QRqHBM0cNCnc9cCb4UjxLN8tQF7I14njB8GrTSjqTyOCpHVj6FV/pub?gid=0&single=true&output=csv";
+            const sheetOverallURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTKhDRhEqo0oy2pFwesdUZaMFTD5QRqHBM0cNCnc9cCb4UjxLN8tQF7I14njB8GrTSjqTyOCpHVj6FV/pub?gid=187588943&single=true&output=csv";
+            const sheetClusterURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTKhDRhEqo0oy2pFwesdUZaMFTD5QRqHBM0cNCnc9cCb4UjxLN8tQF7I14njB8GrTSjqTyOCpHVj6FV/pub?gid=1667516229&single=true&output=csv";
+
+            document.getElementById("mensaje").textContent = "Cargando datos...";
+
+            const parseAndProcessData = (url) => {
+                return new Promise((resolve, reject) => { // Use Promise to handle asynchronous parsing
+                    Papa.parse(url, {
+                        download: true,
+                        header: true,
+                        complete: function(results) {
+                            if (results.errors.length) {
+                                console.error(`Errores de parsing en ${url}:`, results.errors);
+                                reject(new Error(`Error de formato en datos de ${url}.`));
+                                return;
+                            }
+
+                            const processedData = results.data.map(row => {
+                                const newRow = {};
+                                for (const key in row) {
+                                    newRow[key + '_display'] = row[key]; 
+                                    newRow[key] = normalizeString(row[key]); 
+                                }
+                                return newRow;
+                            }).filter(row => {
+                                return Object.keys(row).some(key => 
+                                    key.endsWith('_display') && 
+                                    row[key] !== null && 
+                                    row[key] !== undefined && 
+                                    row[key].toString().trim() !== ''
+                                );
+                            });
+                            
+                            resolve(processedData); // Resolve the promise with the processed data
+                        },
+                        error: function(err) {
+                            console.error(`Error de red/carga al procesar ${url}:`, err);
+                            reject(new Error(`Error al cargar datos de ${url}. Verifique la URL o su conexión.`));
+                        }
+                    });
+                });
+            };
+
+            // Load all three CSVs in parallel using Promise.all
+            Promise.all([
+                parseAndProcessData(sheetDataURL),
+                parseAndProcessData(sheetOverallURL),
+                parseAndProcessData(sheetClusterURL)
+            ])
+            .then(([res1, res2, res3]) => {
+                data = res1.filter(r => r.country_name && r.partner_name && r.semana && r.shopper_name);
+                overall = res2.filter(r => r.country_name && r.partner_name && r.semana);
+                clusterData = res3.filter(r => r.country_name && r.cluster_name);
+                
+                aplicarFiltros();
+                ["franquicia", "sucursal", "semana", "shopper"].forEach(id => {
+                    document.getElementById(id).addEventListener("change", aplicarFiltros);
+                });
+                document.getElementById("mensaje").textContent = "Datos cargados correctamente.";
+            })
+            .catch(error => {
+                // Display error message if any promise rejects
+                document.getElementById("mensaje").textContent = `Error crítico al cargar datos: ${error.message}`;
+                console.error("Error en Promise.all:", error);
+            });
+        }
+    </script>
 </body>
 </html>
+
+
