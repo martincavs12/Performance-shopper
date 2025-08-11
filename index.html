@@ -113,6 +113,16 @@
             font-weight: 600;
             margin-top: 15px;
         }
+
+        /* --- Bloques de Oportunidad (pilares con bullets + iconos) --- */
+        .op-block { margin: 12px 0 4px; }
+        .op-label { font-weight: 700; margin-bottom: 6px; }
+        .op-pillar { margin: 10px 0 14px; }
+        .op-title { font-weight: 700; color:#100423; margin-bottom: 6px; display:flex; align-items:center; gap:8px; }
+        .op-ico { width: 1.25rem; display:inline-block; text-align:center; }
+        .op-list { margin: 0; padding-left: 22px; }
+        .op-list li { margin: 3px 0; text-align: left; }
+        .card ul { margin:0; } /* asegura consistencia dentro de cards */
     </style>
 </head>
 <body>
@@ -192,6 +202,62 @@
                 document.getElementById("error").textContent = "Credenciales incorrectas";
             }
         }
+
+        /* ========== Render de Oportunidades (pilares con bullets + iconos) ========== */
+        function escapeHTML(s='') {
+          return s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+        }
+        function getPillarIcon(title) {
+          const t = (title||'').toLowerCase();
+          if (t.includes('picking')) return '🛒';
+          if (t.includes('tiempos')) return '⏱️';
+          return '✅'; // calidad
+        }
+        // Convierte "Picking: ...; ...; | Tiempos: ...; | Calidad: ..." (o con <br>/\n) a HTML
+        function renderOportunidadHTML(raw) {
+          if (!raw || /sin desvio|sin desvío|sin desvíos/i.test(raw)) {
+            return '<div class="op-block"><div class="op-label">Puntos a Mejorar:</div><em>Sin desvíos relevantes</em></div>';
+          }
+          let text = String(raw)
+            .replace(/<br\s*\/?>/gi, '\n') // soporta <br> desde la query
+            .replace(/\r/g, '')
+            .trim();
+
+          // Corto por pilares: " | " o doble salto
+          const pillarChunks = text.split(/\s*\|\s*|\n{2,}/).map(x => x.trim()).filter(Boolean);
+          const looksLikePillars = pillarChunks.some(p => /^(\s*)?(Picking|Tiempos|Calidad)\s*:/i.test(p));
+          if (!looksLikePillars) {
+            // Fallback elegante: muestro el texto tal cual con saltos
+            return `<div class="op-block"><div class="op-label">Puntos a Mejorar:</div>${escapeHTML(text).replace(/\n/g,'<br>')}</div>`;
+          }
+
+          const htmlPillars = pillarChunks.map(chunk => {
+            const m = chunk.match(/^\s*(Picking|Tiempos|Calidad)\s*:\s*(.*)$/i);
+            if (!m) return '';
+            const title = m[1];
+            const body  = m[2] || '';
+
+            const items = body
+              .split(/;|\n/)
+              .map(s => s.replace(/^•\s*/,'').trim())
+              .filter(Boolean);
+
+            const li = items.map(it => `<li>${escapeHTML(it)}</li>`).join('');
+            const list = li ? `<ul class="op-list">${li}</ul>` 
+                            : `<ul class="op-list"><li>Por debajo del mínimo de ${title.toLowerCase()}</li></ul>`;
+
+            return `<div class="op-pillar">
+                      <div class="op-title"><span class="op-ico">${getPillarIcon(title)}</span>${title}</div>
+                      ${list}
+                    </div>`;
+          }).join('');
+
+          return `<div class="op-block">
+                    <div class="op-label">Puntos a Mejorar:</div>
+                    ${htmlPillars}
+                  </div>`;
+        }
+        /* ========================================================================== */
 
         function aplicarFiltros() {
             const franquicia = document.getElementById("franquicia").value;
@@ -294,12 +360,13 @@
             );
 
             if (storeOverall) {
+                const oppOverallHTML = renderOportunidadHTML(storeOverall.oportunidad_de_mejora_display || '');
                 overallScoreDiv.innerHTML = `
                 <h3>Puntaje General de la Tienda (${storeOverall.partner_name_display || '-'})</h3>
                 <p><strong>Puntaje:</strong> ${storeOverall.shopper_scoring_display || '-'}</p>
                 <p><strong>Posición:</strong> ${storeOverall.cluster_name_final_display || '-'}</p>
                 <p><strong>Órdenes canceladas:</strong> ${storeOverall.VFR_display || '-'}</p>
-                <p><strong>Oportunidad de Mejora:</strong> ${storeOverall.oportunidad_de_mejora_display || '-'}</p>
+                ${oppOverallHTML}
                 
                 <h4>TIEMPOS</h4>
                 <p><strong>Puntaje Tiempos:</strong> ${storeOverall.timing_compliance_display || '-'}</p>
@@ -356,11 +423,12 @@
         function crearCard(r, titulo) {
             const div = document.createElement("div");
             div.className = "card " + getColor(r.cluster_name_final_display); 
+            const oppHTML = renderOportunidadHTML(r.oportunidad_de_mejora_display || '');
             div.innerHTML = `
                 <h3>${titulo || '-'}</h3>
                 <p><strong>Puntaje:</strong> ${r.shopper_scoring_display || '-'}</p>
                 <p><strong>Posición:</strong> ${r.cluster_name_final_display || '-'}</p>
-                <p><strong>Puntos a Mejorar:</strong> ${r.oportunidad_de_mejora_display || '-'}</p>
+                ${oppHTML}
                 <p><strong>Semana:</strong> ${r.semana_display || '-'}</p>
 
                 <h4>TIEMPOS</h4>
@@ -392,7 +460,7 @@
             if (normalizedPos.includes("plata")) return "plata";
             if (normalizedPos.includes("oro")) return "oro";
             if (normalizedPos.includes("bronce")) return "bronce";
-            if (normalizedPos.includes("critico")) return "critico";
+            if (normalizedPos.includes("critico") || normalizedPos.includes("crítico")) return "critico";
             return '';
         }
 
@@ -460,7 +528,7 @@
             document.getElementById("mensaje").textContent = "Cargando datos...";
 
             const parseAndProcessData = (url) => {
-                return new Promise((resolve, reject) => { // Use Promise to handle asynchronous parsing
+                return new Promise((resolve, reject) => {
                     Papa.parse(url, {
                         download: true,
                         header: true,
@@ -487,7 +555,7 @@
                                 );
                             });
                             
-                            resolve(processedData); // Resolve the promise with the processed data
+                            resolve(processedData);
                         },
                         error: function(err) {
                             console.error(`Error de red/carga al procesar ${url}:`, err);
@@ -497,7 +565,6 @@
                 });
             };
 
-            // Load all three CSVs in parallel using Promise.all
             Promise.all([
                 parseAndProcessData(sheetDataURL),
                 parseAndProcessData(sheetOverallURL),
@@ -515,7 +582,6 @@
                 document.getElementById("mensaje").textContent = "Datos cargados correctamente.";
             })
             .catch(error => {
-                // Display error message if any promise rejects
                 document.getElementById("mensaje").textContent = `Error crítico al cargar datos: ${error.message}`;
                 console.error("Error en Promise.all:", error);
             });
@@ -523,6 +589,3 @@
     </script>
 </body>
 </html>
-
-
-
