@@ -523,7 +523,7 @@
         function cargarDatos() {
             const sheetDataURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRbBn-CwY8blDIg4L7AeOkns4MJctWVsyz_0K2eoUMHLcomJlAFvFj8JTcUdRSihApCvsrHhiJYSvU1/pub?output=csv";
             const sheetOverallURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRbBn-CwY8blDIg4L7AeOkns4MJctWVsyz_0K2eoUMHLcomJlAFvFj8JTcUdRSihApCvsrHhiJYSvU1/pub?output=csv";
-            const sheetClusterURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRbBn-CwY8blDIg4L7AeOkns4MJctWVsyz_0K2eoUMHLcomJlAFvFj8JTcUdRSihApCvsrHhiJYSvU1/pub?gid=1705954171&single=true&output=csv";
+            const sheetClusterURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRbBn-CwY8blDIg4L7AeOkns4MJctWVsyz_0K2eoUMHLcomJlAFvFj8JTcUdRSihApCvsrHhiJYSvU1/pub?output=csv";
 
             document.getElementById("mensaje").textContent = "Cargando datos...";
 
@@ -534,8 +534,8 @@
                         header: true,
                         complete: function(results) {
                             if (results.errors.length) {
-                                console.error(`Errores de parsing en url:`, results.errors);
-                                reject(new Error(`Error de formato en datos de url.`));
+                                console.error(`Errores de parsing en ${url}:`, results.errors);
+                                reject(new Error(`Error de formato en datos de ${url}.`));
                                 return;
                             }
 
@@ -558,8 +558,8 @@
                             resolve(processedData);
                         },
                         error: function(err) {
-                            console.error(`Error de red/carga al procesar url:`, err);
-                            reject(new Error(`Error al cargar datos de la url. Verifique la URL o su conexión.`));
+                            console.error(`Error de red/carga al procesar ${url}:`, err);
+                            reject(new Error(`Error al cargar datos de ${url}. Verifique la URL o su conexión.`));
                         }
                     });
                 });
@@ -589,5 +589,3 @@
     </script>
 </body>
 </html>
-
-
