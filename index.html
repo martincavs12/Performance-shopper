@@ -416,7 +416,7 @@ function crearCard(r, titulo) {
                 <p><strong>Puntaje:</strong> ${getVal(r, ['shopper_scoring'])}${formatDelta(r, 'var_shopper_scoring')}</p>
                 <p><strong>Posición:</strong> ${r.cluster_name_final_display || '-'}</p>
                 <p><strong>Nivel de Experiencia:</strong> ${r.nivel_experiencia_display || '-'}</p>
-                ${expHTML}
+              
                 ${oppHTML}
                 <p><strong>Semana:</strong> ${r.semana_display || '-'}</p>
 
@@ -578,6 +578,7 @@ function crearCard(r, titulo) {
     </script>
 </body>
 </html>
+
 
 
 
