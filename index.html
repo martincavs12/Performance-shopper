@@ -411,9 +411,6 @@ function crearCard(r, titulo) {
             div.className = "card " + getColor(r.cluster_name_final_display); 
             const oppHTML = renderOportunidadHTML(r.oportunidad_de_mejora_display || '');
 
-            const exp = getVal(r, ['nivel_experiencia']);
-            const expHTML = (exp && exp !== '-') ? `<p><strong>Experiencia:</strong> ${exp}</p>` : '';
-
             div.innerHTML = `
                 <h3>${titulo || '-'}</h3>
                 <p><strong>Puntaje:</strong> ${getVal(r, ['shopper_scoring'])}${formatDelta(r, 'var_shopper_scoring')}</p>
@@ -581,6 +578,7 @@ function crearCard(r, titulo) {
     </script>
 </body>
 </html>
+
 
 
 
