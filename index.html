@@ -195,7 +195,7 @@ function showNovedadBanner(){
   // Mostramos a todos EXCEPTO Panamá y República Dominicana
   if (!EXCLUDED_BANNER.has(userPaisNormalized)) {
     el.innerHTML = `
-      📢Novedad: ya puedes enviar <strong>sugerencias pesables</strong> para los productos faltantes que sean pesables.
+      📢Novedad: ya puedes enviar sugerencias pesables para los productos faltantes que sean pesables.
       ¡Consulta más detalles <a href="${PDF_URL}" target="_blank" rel="noopener">aquí</a>!
     `;
     el.classList.remove("hidden");
@@ -581,6 +581,7 @@ function crearCard(r, titulo) {
     </script>
 </body>
 </html>
+
 
 
 
