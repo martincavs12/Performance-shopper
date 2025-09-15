@@ -53,6 +53,24 @@
   color: #0a5ea8;
   text-decoration: underline;
 }
+        .banner-info {
+  margin: 12px 0 18px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: #fff9e6; /* Amarillo claro */
+  border: 1px solid #ffecb3;
+  color: #664d03; /* Texto oscuro */
+  font-weight: 600;
+}
+.banner-info a {
+  color: #856404;
+  text-decoration: underline;
+}
+/* Esto es para que la etiqueta <strong> no se rompa dentro del banner */
+.banner-info strong {
+    width: auto; 
+    display: inline;
+}
     </style>
 </head>
 <body>
@@ -67,6 +85,7 @@
     <div class="container hidden" id="app">
         <h2>Reporte de Performance</h2>
         <div id="bannerNovedad" class="banner-novedad hidden"></div>
+        <div id="bannerAdicional" class="banner-info hidden"></div>
         <label for="pais">País</label>
         <select id="pais" disabled><option value="">Seleccionar</option></select>
         
@@ -219,7 +238,41 @@ function showNovedadBanner(){
     el.classList.add("hidden");
   }
 }
+/* INICIO de la nueva función para la encuesta */
+function showBannerAdicional() {
+  const el = document.getElementById("bannerAdicional");
+  if (!el) return;
 
+  // --- 1. Define los links de la ENCUESTA para cada país ---
+  const LINKS_POR_PAIS = {
+    "argentina": "https://forms.gle/GQAgzMXnwZmdr3uF6",
+    "guatemala": "https://forms.gle/FX85hWxcog1sk9SMA",
+    "bolivia": "https://forms.gle/tPKp9ZFMY9Qu7ADA8",
+    "ecuador": "https://forms.gle/SsTgJjM7jtnA8hYP6",
+    "honduras": "https://forms.gle/VEaeLGhDNLMed26k8",
+    "panama": "https://forms.gle/LT9pHELjbeTuNYU19",
+    "peru": "https://forms.gle/DYCUboQHn8oEpakz8",
+    "republica dominicana": "https://forms.gle/vhs8jgwLfW32iYYx8"
+    // "uruguay" se omite intencionalmente para que no vea el banner.
+  };
+
+  // --- 2. Busca el link del país actual ---
+  const linkDelPais = LINKS_POR_PAIS[userPaisNormalized];
+
+  // --- 3. Muestra el banner SOLO si se encontró un link ---
+  if (linkDelPais) {
+    // Texto del banner con el link "Responde la encuesta aqui"
+    el.innerHTML = `
+      📝 <strong>Queremos conocer tu experiencia como Shopper.</strong> 100% anónimo.
+      <a href="${linkDelPais}" target="_blank" rel="noopener">Responde la encuesta aqui</a>.
+    `;
+    el.classList.remove("hidden");
+  } else {
+    // Si es Uruguay o un país no listado, se oculta
+    el.classList.add("hidden");
+  }
+}
+/* FIN de la nueva función */
         function validarLogin() {
             const u = document.getElementById("usuario").value.toLowerCase();
             const p = document.getElementById("contrasena").value.toLowerCase();
@@ -236,6 +289,7 @@ function showNovedadBanner(){
                 document.getElementById("app").classList.remove("hidden");
                 document.getElementById("pais").innerHTML = `<option value="${userPaisDisplayName}">${userPaisDisplayName}</option>`;
                 showNovedadBanner();
+                showBannerAdicional();
                 cargarDatos();
             } else {
                 document.getElementById("error").textContent = "Credenciales incorrectas";
@@ -594,6 +648,7 @@ function crearCard(r, titulo) {
     </script>
 </body>
 </html>
+
 
 
 
