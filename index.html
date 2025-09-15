@@ -152,23 +152,39 @@
           var_picking_late: 'downGood',
           var_first_prod_late: 'downGood',
         };
+        // ⭐ NUEVO: Lista de métricas que NO llevan el signo de porcentaje
+const METRICAS_SIN_PORCENTAJE = new Set([
+    'var_first_prod_time_puntos',
+    'var_picking_time_puntos'
+]);
         function parseDeltaNumber(s) {
           if (s === null || s === undefined) return null;
           let t = String(s).trim().replace(/\u2212/g, '-').replace(',', '.');
           const m = t.match(/[-+]?(\d+(\.\d+)?)/);
           return m ? parseFloat(m[0]) : NaN;
         }
-        function formatDelta(row, varKey) {
-          const raw = row[varKey + '_display'];
-          if (raw === undefined || raw === null || String(raw).trim() === '') return '';
-          const n = parseDeltaNumber(raw);
-          if (!isFinite(n) || n === 0) return '';
-          const rule = DELTA_RULE[varKey] || 'upGood';
-          const isUp = n > 0;
-          const isGood = rule === 'downGood' ? (n < 0) : (n > 0);
-          const arrow = isUp ? '↑' : '↓';
-          const cls = isGood ? 'good' : 'bad';
-          return ` <span class="delta ${cls}">(${arrow} ${escapeHTML(String(raw).trim())})</span>`;
+        function formatDelta(row, varKey) {const raw = row[varKey + '_display'];
+    if (raw === undefined || raw === null || String(raw).trim() === '') return '';
+
+    const n = parseDeltaNumber(raw);
+    // 1. Corregido: Mostrar también si la variación es 0
+    if (!isFinite(n)) return '';
+
+    // 2. Corregido: Determinar si se agrega el signo %
+    const sufijo = METRICAS_SIN_PORCENTAJE.has(varKey) ? '' : '%';
+    const valorMostrado = escapeHTML(String(raw).trim()) + sufijo;
+
+    // Lógica para mostrar 0 con un ícono neutral
+    if (n === 0) {
+        return ` <span class="delta">(↔ ${valorMostrado})</span>`;
+    }
+
+    const rule = DELTA_RULE[varKey] || 'upGood';
+    const isUp = n > 0;
+    const isGood = rule === 'downGood' ? (n < 0) : (n > 0);
+    const arrow = isUp ? '↑' : '↓';
+    const cls = isGood ? 'good' : 'bad';
+    return ` <span class="delta ${cls}">(${arrow} ${valorMostrado})</span>`;
         }
 
         const USERS = {
@@ -578,6 +594,7 @@ function crearCard(r, titulo) {
     </script>
 </body>
 </html>
+
 
 
 
