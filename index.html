@@ -243,36 +243,23 @@ function showBannerAdicional() {
   const el = document.getElementById("bannerAdicional");
   if (!el) return;
 
-  // --- 1. Define los links de la ENCUESTA para cada país ---
-  const LINKS_POR_PAIS = {
-    "argentina": "https://forms.gle/GQAgzMXnwZmdr3uF6",
-    "guatemala": "https://forms.gle/FX85hWxcog1sk9SMA",
-    "bolivia": "https://forms.gle/tPKp9ZFMY9Qu7ADA8",
-    "ecuador": "https://forms.gle/SsTgJjM7jtnA8hYP6",
-    "honduras": "https://forms.gle/VEaeLGhDNLMed26k8",
-    "panama": "https://forms.gle/LT9pHELjbeTuNYU19",
-    "peru": "https://forms.gle/DYCUboQHn8oEpakz8",
-    "republica dominicana": "https://forms.gle/vhs8jgwLfW32iYYx8"
-    // "uruguay" se omite intencionalmente para que no vea el banner.
-  };
-
-  // --- 2. Busca el link del país actual ---
-  const linkDelPais = LINKS_POR_PAIS[userPaisNormalized];
-
-  // --- 3. Muestra el banner SOLO si se encontró un link ---
-  if (linkDelPais) {
-    // Texto del banner con el link "Responde la encuesta aqui"
-    el.innerHTML = `
-      📝 <strong>Queremos conocer tu experiencia como Shopper.</strong> 100% anónimo.
-      <a href="${linkDelPais}" target="_blank" rel="noopener">Responde la encuesta aquí</a>.
-    `;
-    el.classList.remove("hidden");
-  } else {
-    // Si es Uruguay o un país no listado, se oculta
+  // Si no querés mostrar nada para ciertos países, podés seguir usando esta lógica,
+  // pero como es un "gracias", normalmente se lo mostramos a todos los que participaron.
+  // Ej: ocultar solo Uruguay:
+  const OCULTAR_PAISES = new Set(["uruguay"]);
+  if (OCULTAR_PAISES.has(userPaisNormalized)) {
     el.classList.add("hidden");
+    return;
   }
+
+  el.innerHTML = `
+    🙌 <strong>¡Gracias por compartir tu experiencia!</strong>
+    Vamos a analizar las respuestas con el equipo para trabajar en oportunidades de mejora y seguir construyendo una mejor experiencia para todos.
+  `;
+  el.classList.remove("hidden");
 }
 /* FIN de la nueva función */
+
         function validarLogin() {
             const u = document.getElementById("usuario").value.toLowerCase();
             const p = document.getElementById("contrasena").value.toLowerCase();
@@ -648,6 +635,7 @@ function crearCard(r, titulo) {
     </script>
 </body>
 </html>
+
 
 
 
