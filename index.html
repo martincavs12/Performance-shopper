@@ -40,19 +40,6 @@
         .delta { font-weight: 700; margin-left: 4px; }
         .delta.good { color: #0a8f3d; }
         .delta.bad  { color: #c0392b; }
-        .banner-novedad{
-  margin: 12px 0 18px;
-  padding: 12px 14px;
-  border-radius: 10px;
-  background: #eaf8ff;
-  border: 1px solid #b9e3ff;
-  color: #083b55;
-  font-weight: 600;
-}
-.banner-novedad a{
-  color: #0a5ea8;
-  text-decoration: underline;
-}
         .banner-info {
   margin: 12px 0 18px;
   padding: 12px 14px;
@@ -84,7 +71,6 @@
 
     <div class="container hidden" id="app">
         <h2>Reporte de Performance</h2>
-        <div id="bannerNovedad" class="banner-novedad hidden"></div>
         <div id="bannerAdicional" class="banner-info hidden"></div>
         <label for="pais">País</label>
         <select id="pais" disabled><option value="">Seleccionar</option></select>
@@ -223,21 +209,7 @@ const PDF_URL = "https://drive.google.com/file/d/1F1TDRak4iPKly98hPAEZxMMQDIbp22
 // Países EXCLUIDOS del banner (usar SIEMPRE normalizados)
 const EXCLUDED_BANNER = new Set(["panama", "republica dominicana"]);
 
-function showNovedadBanner(){
-  const el = document.getElementById("bannerNovedad");
-  if (!el) return;
 
-  // Mostramos a todos EXCEPTO Panamá y República Dominicana
-  if (!EXCLUDED_BANNER.has(userPaisNormalized)) {
-    el.innerHTML = `
-      📢Novedad: ya puedes enviar sugerencias pesables para los productos faltantes que sean pesables.
-      ¡Consulta más detalles <a href="${PDF_URL}" target="_blank" rel="noopener">aquí</a>!
-    `;
-    el.classList.remove("hidden");
-  } else {
-    el.classList.add("hidden");
-  }
-}
 /* INICIO de la nueva función para la encuesta */
 function showBannerAdicional() {
   const el = document.getElementById("bannerAdicional");
@@ -275,7 +247,6 @@ function showBannerAdicional() {
                 document.getElementById("login").classList.add("hidden");
                 document.getElementById("app").classList.remove("hidden");
                 document.getElementById("pais").innerHTML = `<option value="${userPaisDisplayName}">${userPaisDisplayName}</option>`;
-                showNovedadBanner();
                 showBannerAdicional();
                 cargarDatos();
             } else {
@@ -635,6 +606,7 @@ function crearCard(r, titulo) {
     </script>
 </body>
 </html>
+
 
 
 
