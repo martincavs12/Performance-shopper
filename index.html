@@ -58,6 +58,30 @@
     width: auto; 
     display: inline;
 }
+/* UBICACIÓN: Dentro de la etiqueta <style> */
+
+/* ESTILOS PARA BANNER POR PAÍS (DESACTIVADO)
+  Para activarlos, quitá las etiquetas de comentario de este bloque.
+*/
+/*
+.banner-especifico {
+  margin: 12px 0 18px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: #f3e5f5; 
+  border: 1px solid #ce93d8;
+  color: #6a1b9a;
+  font-weight: 600;
+}
+.banner-especifico a {
+  color: #4a148c;
+  text-decoration: underline;
+}
+.banner-especifico strong {
+  width: auto;  
+  display: inline;
+}
+*/
     </style>
 </head>
 <body>
@@ -230,6 +254,49 @@ function showBannerAdicional() {
   `;
   el.classList.remove("hidden");
 }
+// UBICACIÓN: Junto a las otras funciones de banners.
+
+/*
+  FUNCIÓN PARA BANNER POR PAÍS (DESACTIVADA)
+  Para activarla, quitá las etiquetas de comentario de este bloque.
+*/
+/*
+function showBannerPaisEspecifico() {
+  const el = document.getElementById("bannerPaisEspecifico");
+  if (!el) return;
+
+  // Objeto con los mensajes para cada país (usa nombres normalizados)
+  const MENSAJES_POR_PAIS = {
+    "panama": `
+      <strong>¡Atención Panamá!</strong> 
+      TU MENSAJE ESPECÍFICO PARA PANAMÁ AQUÍ
+      <a href="#" target="_blank">Más info aquí</a>.
+    `,
+    "argentina": `
+      <strong>¡Novedades para Argentina!</strong> 
+      TU MENSAJE ESPECÍFICO PARA ARGENTINA AQUÍ
+    `,
+    "honduras": `
+      <strong>Comunicado para Honduras:</strong> 
+      TU MENSAJE ESPECÍFICO PARA HONDURAS AQUÍ
+    `,
+    "peru": `
+      <strong>Información importante para Perú:</strong> 
+      TU MENSAJE ESPECÍFICO PARA PERÚ AQUÍ
+    `
+  };
+
+  // Busca si hay un mensaje para el país del usuario
+  const mensaje = MENSAJES_POR_PAIS[userPaisNormalized];
+
+  if (mensaje) {
+    el.innerHTML = mensaje;
+    el.classList.remove("hidden"); // Muestra el banner
+  } else {
+    el.classList.add("hidden"); // Mantiene el banner oculto para otros países
+  }
+}
+*/
 /* FIN de la nueva función */
 
         function validarLogin() {
@@ -248,6 +315,7 @@ function showBannerAdicional() {
                 document.getElementById("app").classList.remove("hidden");
                 document.getElementById("pais").innerHTML = `<option value="${userPaisDisplayName}">${userPaisDisplayName}</option>`;
                 showBannerAdicional();
+            // showBannerPaisEspecifico(); // <-- LLAMADA DESACTIVADA. Quitá los '//' para activarla.
                 cargarDatos();
             } else {
                 document.getElementById("error").textContent = "Credenciales incorrectas";
@@ -606,6 +674,7 @@ function crearCard(r, titulo) {
     </script>
 </body>
 </html>
+
 
 
 
