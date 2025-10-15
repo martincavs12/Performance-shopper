@@ -58,6 +58,24 @@
     width: auto; 
     display: inline;
 }
+/* ESTILOS PARA BANNER PODIO PANAMÁ */
+.banner-podio {
+  margin: 12px 0 18px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: #e0f7fa; /* Tono cyan claro */
+  border: 1px solid #4dd0e1;
+  color: #006064; /* Texto oscuro */
+  font-weight: 600;
+}
+.banner-podio a {
+  color: #004d40;
+  text-decoration: underline;
+}
+.banner-podio strong {
+  width: auto;  
+  display: inline;
+}
 /* UBICACIÓN: Dentro de la etiqueta <style> */
 
 /* ESTILOS PARA BANNER POR PAÍS (DESACTIVADO)
@@ -95,7 +113,7 @@
 
     <div class="container hidden" id="app">
         <h2>Reporte de Performance</h2>
-        <div id="bannerAdicional" class="banner-info hidden"></div>
+        <div id="bannerpanamapodio" class="banner-podio hidden"></div>
         <label for="pais">País</label>
         <select id="pais" disabled><option value="">Seleccionar</option></select>
         
@@ -233,26 +251,43 @@ const PDF_URL = "https://drive.google.com/file/d/1F1TDRak4iPKly98hPAEZxMMQDIbp22
 // Países EXCLUIDOS del banner (usar SIEMPRE normalizados)
 const EXCLUDED_BANNER = new Set(["panama", "republica dominicana"]);
 
-
-/* INICIO de la nueva función para la encuesta */
-function showBannerAdicional() {
-  const el = document.getElementById("bannerAdicional");
+/* FUNCIÓN PARA BANNER PODIO PANAMÁ */
+function showBannerPanamaPodio() {
+  const el = document.getElementById("bannerpanamapodio");
   if (!el) return;
 
-  // Si no querés mostrar nada para ciertos países, podés seguir usando esta lógica,
-  // pero como es un "gracias", normalmente se lo mostramos a todos los que participaron.
-  // Ej: ocultar solo Uruguay:
-  const OCULTAR_PAISES = new Set(["uruguay"]);
-  if (OCULTAR_PAISES.has(userPaisNormalized)) {
-    el.classList.add("hidden");
-    return;
+  // Este banner solo se muestra si el país es "panama"
+  if (userPaisNormalized === "panama") {
+    el.innerHTML = `<div style="text-align: center; margin-bottom: 12px;">
+        <strong>🏆 ¡Septiembre top 3 ganadores! 🏆</strong>
+      </div>
+      
+      <ol style="padding-left: 20px; margin: 0;">
+        <li><strong>Sergio Pinto</strong> (Supermercados rey David) - 96.53 🥇</li>
+        <li><strong>Daniel Samudio</strong> (Supermercados rey David) - 96.26 🥈</li>
+        <li><strong>Jorge Aguilar</strong> (Supermercados rey David) - 96.00 🥉</li>
+      </ol>
+      
+      <div style="text-align: center; margin-top: 16px; margin-bottom: 12px;">
+        <strong>Menciones honoríficas 🏅</strong>
+      </div>
+      
+      <ul style="padding-left: 20px; margin: 0; list-style-type: '- '; ">
+        <li>Anthony de la rosa (Supermercados rey brisas del golf)</li>
+        <li>José Sanchez (Supermercados rey costa verde)</li>
+        <li>Isidro Dutary (Supermercados rey vía españa)</li>
+        <li>Efraín Solis (Supermercados rey brisas del golf)</li>
+        <li>Bladimir Otero (Supermercados rey centennial)</li>
+        <li>Jorge Alvarez (Supermercados rey calle 50)</li>
+        <li>Reynol Rodriguez (Supermercados rey calle 50)</li>
+        <li>Vicente Murray (Supermercados rey costa del este)</li>
+        <li>Javier Cedeño (Supermercados rey paseo albrook)</li>
+      </ul>
+    `;
+    el.classList.remove("hidden"); // Muestra el banner
+  } else {
+    el.classList.add("hidden"); // Lo oculta para todos los demás
   }
-
-  el.innerHTML = `
-    🙌 <strong>¡Gracias por compartir tu experiencia!</strong>
-    Vamos a analizar las respuestas con el equipo para trabajar en oportunidades de mejora y seguir construyendo una mejor experiencia para todos.
-  `;
-  el.classList.remove("hidden");
 }
 // UBICACIÓN: Junto a las otras funciones de banners.
 
@@ -322,7 +357,7 @@ function showBannerPaisEspecifico() {
                 document.getElementById("login").classList.add("hidden");
                 document.getElementById("app").classList.remove("hidden");
                 document.getElementById("pais").innerHTML = `<option value="${userPaisDisplayName}">${userPaisDisplayName}</option>`;
-                showBannerAdicional();
+                showBannerPanamaPodio(); 
             // showBannerPaisEspecifico(); // <-- LLAMADA DESACTIVADA. Quitá los '//' para activarla.
                 cargarDatos();
             } else {
@@ -682,6 +717,7 @@ function crearCard(r, titulo) {
     </script>
 </body>
 </html>
+
 
 
 
