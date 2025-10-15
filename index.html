@@ -264,25 +264,33 @@ function showBannerAdicional() {
 function showBannerPaisEspecifico() {
   const el = document.getElementById("bannerPaisEspecifico");
   if (!el) return;
+  // 1. DEFINÍ EL LINK AQUÍ UNA SOLA VEZ
+  const LINK_GENERAL = "https://drive.google.com/file/d/1Q_VfrayUYuOQY-uR0nSQNQzR6qj35ndu/view?usp=sharing"; // <-- REEMPLAZÁ CON TU LINK
 
   // Objeto con los mensajes para cada país (usa nombres normalizados)
   const MENSAJES_POR_PAIS = {
     "panama": `
-      <strong>¡Atención Panamá!</strong> 
+      <strong> Novedad solo para Shoppers de Rey Calle 50 y Rey Costa del Este!</strong> 
       TU MENSAJE ESPECÍFICO PARA PANAMÁ AQUÍ
-      <a href="#" target="_blank">Más info aquí</a>.
+      <a href="#" target="_blank">Leé el manual sobre este cambio aquí</a>.
     `,
     "argentina": `
       <strong>¡Novedades para Argentina!</strong> 
       TU MENSAJE ESPECÍFICO PARA ARGENTINA AQUÍ
+    <a href="${LINK_GENERAL}" target="_blank">Leé el manual sobre este cambio aquí</a>.
+
     `,
     "honduras": `
       <strong>Comunicado para Honduras:</strong> 
       TU MENSAJE ESPECÍFICO PARA HONDURAS AQUÍ
+    <a href="${LINK_GENERAL}" target="_blank">Leé el manual sobre este cambio aquí</a>.
+
     `,
     "peru": `
       <strong>Información importante para Perú:</strong> 
       TU MENSAJE ESPECÍFICO PARA PERÚ AQUÍ
+    <a href="${LINK_GENERAL}" target="_blank">Leé el manual sobre este cambio aquí</a>.
+
     `
   };
 
@@ -674,6 +682,7 @@ function crearCard(r, titulo) {
     </script>
 </body>
 </html>
+
 
 
 
