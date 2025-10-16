@@ -28,7 +28,7 @@
         table th { background: #e9ecef; font-weight: 700; color: #495057; }
         table tr:nth-child(even) { background-color: #f8f9fa; }
         table tr:hover { background-color: #f1f1f1; }
-        #mensaje { color: #ea044e; text-align: center; font-weight: 600; margin-top: 15px; }
+        mensaje { color: #ea044e; text-align: center; font-weight: 600; margin-top: 15px; }
         .op-block { margin: 12px 0 4px; }
         .op-label { font-weight: 700; margin-bottom: 6px; }
         .op-pillar { margin: 10px 0 14px; }
@@ -81,7 +81,7 @@
 /* ESTILOS PARA BANNER POR PAÍS (DESACTIVADO)
   Para activarlos, quitá las etiquetas de comentario de este bloque.
 */
-/*
+
 .banner-especifico {
   margin: 12px 0 18px;
   padding: 12px 14px;
@@ -99,7 +99,7 @@
   width: auto;  
   display: inline;
 }
-*/
+
     </style>
 </head>
 <body>
@@ -295,35 +295,29 @@ function showBannerPanamaPodio() {
   FUNCIÓN PARA BANNER POR PAÍS (DESACTIVADA)
   Para activarla, quitá las etiquetas de comentario de este bloque.
 */
-/*
+
 function showBannerPaisEspecifico() {
   const el = document.getElementById("bannerPaisEspecifico");
   if (!el) return;
   // 1. DEFINÍ EL LINK AQUÍ UNA SOLA VEZ
-  const LINK_GENERAL = "https://drive.google.com/file/d/1Q_VfrayUYuOQY-uR0nSQNQzR6qj35ndu/view?usp=sharing"; // <-- REEMPLAZÁ CON TU LINK
+  const LINK_GENERAL = "https://drive.google.com/file/d/1PA_KcST20OiHI31W9nqcj1VdBhS6xMWC/view?usp=sharing"; // <-- REEMPLAZÁ CON TU LINK
 
   // Objeto con los mensajes para cada país (usa nombres normalizados)
   const MENSAJES_POR_PAIS = {
     "panama": `
       <strong>🆕 Novedad solo para Shoppers de Rey Calle 50 y Rey Costa del Este!</strong> 
-      A partir del Lunes 20/10 los clientes van a poder enviarte “Notas” en Frutas y verduras para que puedas elegir mejor segun sus preferencias🍎🍌
+      A partir del Lunes 20/10 los clientes van a poder enviarte “Notas” en Frutas y verduras para que puedas elegir mejor según sus preferencias🍎🍌
       <a href="#" target="_blank">👉Leé el manual sobre este cambio aquí</a>.
     `,
     "argentina": `
       <strong>🆕 Novedad solo para Shoppers de Jumbo Tronador, Carrefour Hiper Olivos e Hiper Roosevelt</strong> 
-      Sumamos “Notas” en productos Ultra Fresh 🍎🍌
-    <a href="${LINK_GENERAL}" target="_blank">👉Leé el manual sobre este cambio aquí</a>.
-
-    `,
-    "honduras": `
-      <strong>🆕 Novedad solo para Shoppers de Diprova</strong> 
-      Sumamos “Notas” en productos Ultra Fresh 🍎🍌
+      A partir del Lunes 20/10 los clientes van a poder enviarte “Notas” en Frutas y verduras para que puedas elegir mejor según sus preferencias🍎🍌
     <a href="${LINK_GENERAL}" target="_blank">👉Leé el manual sobre este cambio aquí</a>.
 
     `,
     "peru": `
       <strong>🆕 Novedad solo para Shoppers de Tottus y Tottus La Marina</strong> 
-      Sumamos “Notas” en productos Ultra Fresh 🍎🍌
+      A partir del Lunes 20/10 los clientes van a poder enviarte “Notas” en Frutas y verduras para que puedas elegir mejor según sus preferencias🍎🍌
     <a href="${LINK_GENERAL}" target="_blank">👉Leé el manual sobre este cambio aquí</a>.
 
     `
@@ -339,7 +333,7 @@ function showBannerPaisEspecifico() {
     el.classList.add("hidden"); // Mantiene el banner oculto para otros países
   }
 }
-*/
+
 /* FIN de la nueva función */
 
         function validarLogin() {
@@ -358,7 +352,7 @@ function showBannerPaisEspecifico() {
                 document.getElementById("app").classList.remove("hidden");
                 document.getElementById("pais").innerHTML = `<option value="${userPaisDisplayName}">${userPaisDisplayName}</option>`;
                 showBannerPanamaPodio(); 
-            // showBannerPaisEspecifico(); // <-- LLAMADA DESACTIVADA. Quitá los '//' para activarla.
+            showBannerPaisEspecifico(); 
                 cargarDatos();
             } else {
                 document.getElementById("error").textContent = "Credenciales incorrectas";
@@ -717,6 +711,7 @@ function crearCard(r, titulo) {
     </script>
 </body>
 </html>
+
 
 
 
