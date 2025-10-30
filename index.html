@@ -40,66 +40,44 @@
         .delta { font-weight: 700; margin-left: 4px; }
         .delta.good { color: #0a8f3d; }
         .delta.bad  { color: #c0392b; }
+
         .banner-info {
-  margin: 12px 0 18px;
-  padding: 12px 14px;
-  border-radius: 10px;
-  background: #EAF7EE; /* Verde claro*/
-  border: 1px solid #B8E1C6;
-  color: #215A36; /* Texto oscuro */
-  font-weight: 600;
-}
-.banner-info a {
-  color: #0F5132;
-  text-decoration: underline;
-}
-/* Esto es para que la etiqueta <strong> no se rompa dentro del banner */
-.banner-info strong {
-    width: auto; 
-    display: inline;
-}
-/* ESTILOS PARA BANNER PODIO PANAMÁ */
-.banner-podio {
-  margin: 12px 0 18px;
-  padding: 12px 14px;
-  border-radius: 10px;
-  background: #f0f0f0; /* Fondo gris muy claro */
-  border: 1px solid #d0d0d0; /* Borde gris medio */
-  color: #333333; /* Texto gris oscuro */
-  font-weight: 600;
-}
-.banner-podio a {
-    color: #555555; /* Un gris oscuro para los enlaces también */
-  text-decoration: underline;
-}
-.banner-podio strong {
-  width: auto;  
-  display: inline;
-}
-/* UBICACIÓN: Dentro de la etiqueta <style> */
+          margin: 12px 0 18px;
+          padding: 12px 14px;
+          border-radius: 10px;
+          background: #EAF7EE; /* Verde claro*/
+          border: 1px solid #B8E1C6;
+          color: #215A36; /* Texto oscuro */
+          font-weight: 600;
+        }
+        .banner-info a { color: #0F5132; text-decoration: underline; }
+        .banner-info strong { width: auto; display: inline; }
 
-/* ESTILOS PARA BANNER POR PAÍS (DESACTIVADO)
-  Para activarlos, quitá las etiquetas de comentario de este bloque.
-*/
+        /* ESTILOS PARA BANNER PODIO PANAMÁ */
+        .banner-podio {
+          margin: 12px 0 18px;
+          padding: 12px 14px;
+          border-radius: 10px;
+          background: #f0f0f0;
+          border: 1px solid #d0d0d0;
+          color: #333333;
+          font-weight: 600;
+        }
+        .banner-podio a { color: #555555; text-decoration: underline; }
+        .banner-podio strong { width: auto; display: inline; }
 
-.banner-especifico {
-  margin: 12px 0 18px;
-  padding: 12px 14px;
-  border-radius: 10px;
-  background: #eaf7ee; 
-  border: 1px solid #b8e1c6;
-  color: #215a36;
-  font-weight: 600;
-}
-.banner-especifico a {
-  color: #0f5132;
-  text-decoration: underline;
-}
-.banner-especifico strong {
-  width: auto;  
-  display: inline;
-}
-
+        /* ESTILOS PARA BANNER POR PAÍS (ACTIVO) */
+        .banner-especifico {
+          margin: 12px 0 18px;
+          padding: 12px 14px;
+          border-radius: 10px;
+          background: #eaf7ee;
+          border: 1px solid #b8e1c6;
+          color: #215a36;
+          font-weight: 600;
+        }
+        .banner-especifico a { color: #0f5132; text-decoration: underline; }
+        .banner-especifico strong { width: auto; display: inline; }
     </style>
 </head>
 <body>
@@ -113,8 +91,13 @@
 
     <div class="container hidden" id="app">
         <h2>Reporte de Performance</h2>
-        <div id="bannerpanamapodio" class="banner-podio hidden"></div>
+
+        <!-- Desactivado temporalmente: Top Shoppers Panamá -->
+        <!-- <div id="bannerpanamapodio" class="banner-podio hidden"></div> -->
+
+        <!-- Activo: Novedad / mensajes por país -->
         <div id="bannerPaisEspecifico" class="banner-especifico hidden"></div>
+
         <label for="pais">País</label>
         <select id="pais" disabled><option value="">Seleccionar</option></select>
         
@@ -163,13 +146,8 @@
             console.error(`Error en ${label}:`, sanitize(msg));
           } catch(_) {}
         }
-        // Ocultar URLs también en errores globales
-        window.addEventListener('error', (e) => {
-          safeError('GLOBAL', e?.error || e?.message || 'Error');
-        });
-        window.addEventListener('unhandledrejection', (e) => {
-          safeError('GLOBAL Promise', e?.reason || 'Rechazo no manejado');
-        });
+        window.addEventListener('error', (e) => { safeError('GLOBAL', e?.error || e?.message || 'Error'); });
+        window.addEventListener('unhandledrejection', (e) => { safeError('GLOBAL Promise', e?.reason || 'Rechazo no manejado'); });
 
         /* ==== Utilidades de lectura/variaciones ==== */
         function escapeHTML(s='') {
@@ -200,39 +178,29 @@
           var_picking_late: 'downGood',
           var_first_prod_late: 'downGood',
         };
-        // ⭐ NUEVO: Lista de métricas que NO llevan el signo de porcentaje
-const METRICAS_SIN_PORCENTAJE = new Set([
-    'var_first_prod_time_puntos',
-    'var_picking_time_puntos'
-]);
+        const METRICAS_SIN_PORCENTAJE = new Set(['var_first_prod_time_puntos','var_picking_time_puntos']);
+
         function parseDeltaNumber(s) {
           if (s === null || s === undefined) return null;
           let t = String(s).trim().replace(/\u2212/g, '-').replace(',', '.');
           const m = t.match(/[-+]?(\d+(\.\d+)?)/);
           return m ? parseFloat(m[0]) : NaN;
         }
-        function formatDelta(row, varKey) {const raw = row[varKey + '_display'];
-    if (raw === undefined || raw === null || String(raw).trim() === '') return '';
 
-    const n = parseDeltaNumber(raw);
-    // 1. Corregido: Mostrar también si la variación es 0
-    if (!isFinite(n)) return '';
-
-    // 2. Corregido: Determinar si se agrega el signo %
-    const sufijo = METRICAS_SIN_PORCENTAJE.has(varKey) ? '' : '%';
-    const valorMostrado = escapeHTML(String(raw).trim()) + sufijo;
-
-    // Lógica para mostrar 0 con un ícono neutral
-    if (n === 0) {
-        return ` <span class="delta">(↔ ${valorMostrado})</span>`;
-    }
-
-    const rule = DELTA_RULE[varKey] || 'upGood';
-    const isUp = n > 0;
-    const isGood = rule === 'downGood' ? (n < 0) : (n > 0);
-    const arrow = isUp ? '↑' : '↓';
-    const cls = isGood ? 'good' : 'bad';
-    return ` <span class="delta ${cls}">(${arrow} ${valorMostrado})</span>`;
+        function formatDelta(row, varKey) {
+          const raw = row[varKey + '_display'];
+          if (raw === undefined || raw === null || String(raw).trim() === '') return '';
+          const n = parseDeltaNumber(raw);
+          if (!isFinite(n)) return '';
+          const sufijo = METRICAS_SIN_PORCENTAJE.has(varKey) ? '' : '%';
+          const valorMostrado = escapeHTML(String(raw).trim()) + sufijo;
+          if (n === 0) return ` <span class="delta">(↔ ${valorMostrado})</span>`;
+          const rule = DELTA_RULE[varKey] || 'upGood';
+          const isUp = n > 0;
+          const isGood = rule === 'downGood' ? (n < 0) : (n > 0);
+          const arrow = isUp ? '↑' : '↓';
+          const cls = isGood ? 'good' : 'bad';
+          return ` <span class="delta ${cls}">(${arrow} ${valorMostrado})</span>`;
         }
 
         const USERS = {
@@ -246,101 +214,62 @@ const METRICAS_SIN_PORCENTAJE = new Set([
             "ecuador": { user: "ecu", pass: "ecu" },
             "uruguay": { user: "uru", pass: "uru" }
         };
-// URL del instructivo (Drive)
-const PDF_URL = "https://drive.google.com/file/d/1F1TDRak4iPKly98hPAEZxMMQDIbp22cA/view";
 
-// Países EXCLUIDOS del banner (usar SIEMPRE normalizados)
-const EXCLUDED_BANNER = new Set(["panama", "republica dominicana"]);
+        // URL del instructivo (Drive)
+        const PDF_URL = "https://drive.google.com/file/d/1F1TDRak4iPKly98hPAEZxMMQDIbp22cA/view";
 
-/* FUNCIÓN PARA BANNER PODIO PANAMÁ */
-function showBannerPanamaPodio() {
-  const el = document.getElementById("bannerpanamapodio");
-  if (!el) return;
+        // Países EXCLUIDOS del banner (por si necesitás lógica adicional)
+        const EXCLUDED_BANNER = new Set(["panama", "republica dominicana"]);
 
-  // Este banner solo se muestra si el país es "panama"
-  if (userPaisNormalized === "panama") {
-    el.innerHTML = `<div style="text-align: center; margin-bottom: 12px;">
-        <strong>🏆 ¡Septiembre top 3 ganadores! 🏆</strong>
-      </div>
-      
-      <ol style="padding-left: 20px; margin: 0;">
-        <li><strong>Sergio Pinto</strong> (Supermercados rey David) - 96.53 🥇</li>
-        <li><strong>Daniel Samudio</strong> (Supermercados rey David) - 96.26 🥈</li>
-        <li><strong>Jorge Aguilar</strong> (Supermercados rey David) - 96.00 🥉</li>
-      </ol>
-      
-      <div style="text-align: center; margin-top: 16px; margin-bottom: 12px;">
-        <strong>Menciones honoríficas 🏅</strong>
-      </div>
-      
-      <ul style="padding-left: 20px; margin: 0; list-style-type: '- '; ">
-        <li>Anthony de la rosa (Supermercados rey brisas del golf)</li>
-        <li>José Sanchez (Supermercados rey costa verde)</li>
-        <li>Isidro Dutary (Supermercados rey vía españa)</li>
-        <li>Efraín Solis (Supermercados rey brisas del golf)</li>
-        <li>Bladimir Otero (Supermercados rey centennial)</li>
-        <li>Jorge Alvarez (Supermercados rey calle 50)</li>
-        <li>Reynol Rodriguez (Supermercados rey calle 50)</li>
-        <li>Vicente Murray (Supermercados rey costa del este)</li>
-        <li>Javier Cedeño (Supermercados rey paseo albrook)</li>
-      </ul>
-    `;
-    el.classList.remove("hidden"); // Muestra el banner
-  } else {
-    el.classList.add("hidden"); // Lo oculta para todos los demás
-  }
-}
-// UBICACIÓN: Junto a las otras funciones de banners.
+        /* ===== DESACTIVADO TEMPORALMENTE: Banner Top Shoppers Panamá =====
+        function showBannerPanamaPodio() {
+          const el = document.getElementById("bannerpanamapodio");
+          if (!el) return;
+          if (userPaisNormalized === "panama") {
+            el.innerHTML = `...`; // (contenido original)
+            el.classList.remove("hidden");
+          } else {
+            el.classList.add("hidden");
+          }
+        }
+        */
 
-/*
-  FUNCIÓN PARA BANNER POR PAÍS (DESACTIVADA)
-  Para activarla, quitá las etiquetas de comentario de este bloque.
-*/
+        // Activo: Banner por país
+        function showBannerPaisEspecifico() {
+          const el = document.getElementById("bannerPaisEspecifico");
+          if (!el) return;
+          const LINK_GENERAL = "https://drive.google.com/file/d/1PA_KcST20OiHI31W9nqcj1VdBhS6xMWC/view?usp=sharing"; 
 
-function showBannerPaisEspecifico() {
-  const el = document.getElementById("bannerPaisEspecifico");
-  if (!el) return;
-  // 1. DEFINÍ EL LINK AQUÍ UNA SOLA VEZ //
-  const LINK_GENERAL = "https://drive.google.com/file/d/1PA_KcST20OiHI31W9nqcj1VdBhS6xMWC/view?usp=sharing"; 
+          const MENSAJES_POR_PAIS = {
+            "panama": `
+              <strong>🆕 Novedad solo para Shoppers de Rey Calle 50 y Rey Costa del Este!</strong> 
+              <div style="margin-top: 8px;">A partir del Lunes 20/10 los clientes van a poder enviarte “Notas” en frutas y verduras para que puedas elegir mejor según sus preferencias🍎🍌
+              <div style="margin-top: 8px;"><a href="${LINK_GENERAL}" target="_blank">👉Leé el manual sobre este cambio aquí</a>.
+            `,
+            "argentina": `
+              <strong>🆕 Novedad solo para Shoppers de Jumbo Tronador, Carrefour Hiper Olivos e Hiper Roosevelt</strong> 
+              <div style="margin-top: 8px;">A partir del Lunes 20/10 los clientes van a poder enviarte “Notas” en frutas y verduras para que puedas elegir mejor según sus preferencias🍎🍌
+              <div style="margin-top: 8px;"><a href="${LINK_GENERAL}" target="_blank">👉Leé el manual sobre este cambio aquí</a>.
+            `,
+            "peru": `
+              <strong>🆕 Novedad solo para Shoppers de Tottus y Tottus La Marina</strong> 
+              <div style="margin-top: 8px;">A partir del Lunes 20/10 los clientes van a poder enviarte “Notas” en frutas y verduras para que puedas elegir mejor según sus preferencias🍎🍌
+              <div style="margin-top: 8px;"><a href="${LINK_GENERAL}" target="_blank">👉Leé el manual sobre este cambio aquí</a>.
+            `
+          };
 
-  // Objeto con los mensajes para cada país (usa nombres normalizados)
-  const MENSAJES_POR_PAIS = {
-    "panama": `
-      <strong>🆕 Novedad solo para Shoppers de Rey Calle 50 y Rey Costa del Este!</strong> 
-      <div style="margin-top: 8px;">A partir del Lunes 20/10 los clientes van a poder enviarte “Notas” en frutas y verduras para que puedas elegir mejor según sus preferencias🍎🍌
-      <div style="margin-top: 8px;"><a href="${LINK_GENERAL}" target="_blank">👉Leé el manual sobre este cambio aquí</a>.
-    `,
-    "argentina": `
-      <strong>🆕 Novedad solo para Shoppers de Jumbo Tronador, Carrefour Hiper Olivos e Hiper Roosevelt</strong> 
-      <div style="margin-top: 8px;">A partir del Lunes 20/10 los clientes van a poder enviarte “Notas” en frutas y verduras para que puedas elegir mejor según sus preferencias🍎🍌
-    <div style="margin-top: 8px;"><a href="${LINK_GENERAL}" target="_blank">👉Leé el manual sobre este cambio aquí</a>.
-
-    `,
-    "peru": `
-      <strong>🆕 Novedad solo para Shoppers de Tottus y Tottus La Marina</strong> 
-      <div style="margin-top: 8px;">A partir del Lunes 20/10 los clientes van a poder enviarte “Notas” en frutas y verduras para que puedas elegir mejor según sus preferencias🍎🍌
-    <div style="margin-top: 8px;"><a href="${LINK_GENERAL}" target="_blank">👉Leé el manual sobre este cambio aquí</a>.
-
-    `
-  };
-
-  // Busca si hay un mensaje para el país del usuario
-  const mensaje = MENSAJES_POR_PAIS[userPaisNormalized];
-
-  if (mensaje) {
-    el.innerHTML = mensaje;
-    el.classList.remove("hidden"); // Muestra el banner
-  } else {
-    el.classList.add("hidden"); // Mantiene el banner oculto para otros países
-  }
-}
-
-/* FIN de la nueva función */
+          const mensaje = MENSAJES_POR_PAIS[userPaisNormalized];
+          if (mensaje) {
+            el.innerHTML = mensaje;
+            el.classList.remove("hidden");
+          } else {
+            el.classList.add("hidden");
+          }
+        }
 
         function validarLogin() {
             const u = document.getElementById("usuario").value.toLowerCase();
             const p = document.getElementById("contrasena").value.toLowerCase();
-            
             const found = Object.entries(USERS).find(([paisKey, cred]) => {
                 return normalizeString(cred.user) === normalizeString(u) && normalizeString(cred.pass) === normalizeString(p);
             });
@@ -352,8 +281,13 @@ function showBannerPaisEspecifico() {
                 document.getElementById("login").classList.add("hidden");
                 document.getElementById("app").classList.remove("hidden");
                 document.getElementById("pais").innerHTML = `<option value="${userPaisDisplayName}">${userPaisDisplayName}</option>`;
-                showBannerPanamaPodio(); 
-            showBannerPaisEspecifico(); 
+
+                // Banner Panamá desactivado:
+                // showBannerPanamaPodio();
+
+                // Banner por país activo:
+                showBannerPaisEspecifico();
+
                 cargarDatos();
             } else {
                 document.getElementById("error").textContent = "Credenciales incorrectas";
@@ -367,6 +301,7 @@ function showBannerPaisEspecifico() {
           if (t.includes('tiempos')) return '⏱️';
           return '✅';
         }
+
         function renderOportunidadHTML(raw) {
           if (!raw || /sin desvio|sin desvío|sin desvíos/i.test(raw)) {
             return '<div class="op-block"><div class="op-label">Puntos a Mejorar:</div><em>Sin desvíos relevantes</em></div>';
@@ -389,7 +324,6 @@ function showBannerPaisEspecifico() {
           }).join('');
           return `<div class="op-block"><div class="op-label">Puntos a Mejorar:</div>${htmlPillars}</div>`;
         }
-        /* ========================================================================== */
 
         function aplicarFiltros() {
             const franquicia = document.getElementById("franquicia").value;
@@ -447,136 +381,135 @@ function showBannerPaisEspecifico() {
             else el.value = el.options[0].value;
         }
 
-     function mostrarResultados() {
-            const franquicia = document.getElementById("franquicia").value;
-            const sucursal = document.getElementById("sucursal").value;
-            const semana = document.getElementById("semana").value;
-            const shopper = document.getElementById("shopper").value;
+        function mostrarResultados() {
+            const franquicia = document.getElementById("franquicia").value;
+            const sucursal = document.getElementById("sucursal").value;
+            const semana = document.getElementById("semana").value;
+            const shopper = document.getElementById("shopper").value;
 
-            const cont = document.getElementById("resultado");
-            const msg = document.getElementById("mensaje");
-            const overallScoreDiv = document.getElementById("overallScore");
-            
-            cont.innerHTML = "";
-            msg.textContent = "";
-            overallScoreDiv.classList.add("hidden");
+            const cont = document.getElementById("resultado");
+            const msg = document.getElementById("mensaje");
+            const overallScoreDiv = document.getElementById("overallScore");
+            
+            cont.innerHTML = "";
+            msg.textContent = "";
+            overallScoreDiv.classList.add("hidden");
 
-            const normalizedFranquicia = normalizeString(franquicia);
-            const normalizedSucursal = normalizeString(sucursal);
-            const normalizedSemana = normalizeString(semana);
-            const normalizedShopper = normalizeString(shopper);
+            const normalizedFranquicia = normalizeString(franquicia);
+            const normalizedSucursal = normalizeString(sucursal);
+            const normalizedSemana = normalizeString(semana);
+            const normalizedShopper = normalizeString(shopper);
 
-            if (!sucursal || !semana) {
-                msg.textContent = "Completá los filtros de Sucursal y Semana para ver resultados.";
-                return;
-            }
+            if (!sucursal || !semana) {
+                msg.textContent = "Completá los filtros de Sucursal y Semana para ver resultados.";
+                return;
+            }
 
-            /* -------- Tarjeta OVERALL (tienda) -------- */
-            const storeOverall = overall.find(r =>
-                r.country_name === userPaisNormalized &&
-                r.partner_name === normalizedSucursal &&
-                r.semana === normalizedSemana &&
-                (!franquicia || r.franchise_name === normalizedFranquicia)
-            );
+            /* -------- Tarjeta OVERALL (tienda) -------- */
+            const storeOverall = overall.find(r =>
+                r.country_name === userPaisNormalized &&
+                r.partner_name === normalizedSucursal &&
+                r.semana === normalizedSemana &&
+                (!franquicia || r.franchise_name === normalizedFranquicia)
+            );
 
-            if (storeOverall) {
-                const oppOverallHTML = renderOportunidadHTML(storeOverall.oportunidad_de_mejora_display || '');
-                overallScoreDiv.innerHTML = `
-                <h3>Puntaje General de la Tienda (${storeOverall.partner_name_display || '-'})</h3>
-                <p><strong>Puntaje:</strong> ${getVal(storeOverall, ['shopper_scoring'])}${formatDelta(storeOverall, 'var_shopper_scoring')}</p>
-                <p><strong>Posición:</strong> ${storeOverall.cluster_name_final_display || '-'}</p>
-                <p><strong>Órdenes canceladas:</strong> ${getVal(storeOverall, ['VFR'])}${formatDelta(storeOverall, 'var_VFR')}</p>
-                ${oppOverallHTML}
-                
-                <h4>TIEMPOS</h4>
-                <p><strong>Puntaje Tiempos:</strong> ${getVal(storeOverall, ['timing_compliance'])}${formatDelta(storeOverall, 'var_timing_compliance')}</p>
-                <p><strong>Tiempo por orden:</strong> ${getVal(storeOverall, ['picking_time'])}${formatDelta(storeOverall, 'var_picking_time_puntos')}</p>
-                <p><strong>%Órdenes tarde:</strong> ${getVal(storeOverall, ['picking_late'])}${formatDelta(storeOverall, 'var_picking_late')}</p>
-                <p><strong>Tiempo en encontrar primer item:</strong> ${getVal(storeOverall, ['first_prod_time'])}${formatDelta(storeOverall, 'var_first_prod_time_puntos')}</p>
-                <p><strong>%Primer item encontrado > 3':</strong> ${getVal(storeOverall, ['first_prod_late'])}${formatDelta(storeOverall, 'var_first_prod_late')}</p>
-                
-                <h4>PICKING</h4>
-                <p><strong>Puntaje Picking:</strong> ${getVal(storeOverall, ['picking_compliance'])}${formatDelta(storeOverall, 'var_picking_compliance')}</p>
-                <p><strong>%Cancelaciones por falta de producto:</strong> ${getVal(storeOverall, ['OOS_FR'])}${formatDelta(storeOverall, 'var_OOS_FR')}</p>
-                <p><strong>%Productos no encontrados:</strong> ${getVal(storeOverall, ['not_found_rate'])}${formatDelta(storeOverall, 'var_not_found_rate')}</p>
-                <p><strong>%Reemplazos enviados:</strong> ${getVal(storeOverall, ['rep_sent'])}${formatDelta(storeOverall, 'var_rep_sent')}</p>
-                <p><strong>%Reemplazos aceptados:</strong> ${getVal(storeOverall, ['rep_rate'])}${formatDelta(storeOverall, 'var_rep_rate')}</p>
-                
-                <h4>CALIDAD</h4>
-                <p><strong>Puntaje Calidad:</strong> ${getVal(storeOverall, ['quality_compliance'])}${formatDelta(storeOverall, 'var_quality_compliance')}</p>
-                <p><strong>%Falta producto:</strong> ${getVal(storeOverall, ['missing_item'])}${formatDelta(storeOverall, 'var_missing_item')}</p>
-                <p><strong>%Producto en mal estado:</strong> ${getVal(storeOverall, ['prod_quality'])}${formatDelta(storeOverall, 'var_prod_quality')}</p>
-                <p><strong>%Producto equivocado:</strong> ${getVal(storeOverall, ['wrong_item'])}${formatDelta(storeOverall, 'var_wrong_item')}</p>
-              `;
-                overallScoreDiv.classList.remove("hidden");
-                overallScoreDiv.classList.remove("oro", "plata", "bronce", "critico");
-                overallScoreDiv.classList.add(getColor(storeOverall.cluster_name_final_display));
-            } else {
-                overallScoreDiv.classList.add("hidden");
-            }
+            if (storeOverall) {
+                const oppOverallHTML = renderOportunidadHTML(storeOverall.oportunidad_de_mejora_display || '');
+                overallScoreDiv.innerHTML = `
+                <h3>Puntaje General de la Tienda (${storeOverall.partner_name_display || '-'})</h3>
+                <p><strong>Puntaje:</strong> ${getVal(storeOverall, ['shopper_scoring'])}${formatDelta(storeOverall, 'var_shopper_scoring')}</p>
+                <p><strong>Posición:</strong> ${storeOverall.cluster_name_final_display || '-'}</p>
+                <p><strong>Órdenes canceladas:</strong> ${getVal(storeOverall, ['VFR'])}${formatDelta(storeOverall, 'var_VFR')}</p>
+                ${oppOverallHTML}
+                
+                <h4>TIEMPOS</h4>
+                <p><strong>Puntaje Tiempos:</strong> ${getVal(storeOverall, ['timing_compliance'])}${formatDelta(storeOverall, 'var_timing_compliance')}</p>
+                <p><strong>Tiempo por orden:</strong> ${getVal(storeOverall, ['picking_time'])}${formatDelta(storeOverall, 'var_picking_time_puntos')}</p>
+                <p><strong>%Órdenes tarde:</strong> ${getVal(storeOverall, ['picking_late'])}${formatDelta(storeOverall, 'var_picking_late')}</p>
+                <p><strong>Tiempo en encontrar primer item:</strong> ${getVal(storeOverall, ['first_prod_time'])}${formatDelta(storeOverall, 'var_first_prod_time_puntos')}</p>
+                <p><strong>%Primer item encontrado > 3':</strong> ${getVal(storeOverall, ['first_prod_late'])}${formatDelta(storeOverall, 'var_first_prod_late')}</p>
+                
+                <h4>PICKING</h4>
+                <p><strong>Puntaje Picking:</strong> ${getVal(storeOverall, ['picking_compliance'])}${formatDelta(storeOverall, 'var_picking_compliance')}</p>
+                <p><strong>%Cancelaciones por falta de producto:</strong> ${getVal(storeOverall, ['OOS_FR'])}${formatDelta(storeOverall, 'var_OOS_FR')}</p>
+                <p><strong>%Productos no encontrados:</strong> ${getVal(storeOverall, ['not_found_rate'])}${formatDelta(storeOverall, 'var_not_found_rate')}</p>
+                <p><strong>%Reemplazos enviados:</strong> ${getVal(storeOverall, ['rep_sent'])}${formatDelta(storeOverall, 'var_rep_sent')}</p>
+                <p><strong>%Reemplazos aceptados:</strong> ${getVal(storeOverall, ['rep_rate'])}${formatDelta(storeOverall, 'var_rep_rate')}</p>
+                
+                <h4>CALIDAD</h4>
+                <p><strong>Puntaje Calidad:</strong> ${getVal(storeOverall, ['quality_compliance'])}${formatDelta(storeOverall, 'var_quality_compliance')}</p>
+                <p><strong>%Falta producto:</strong> ${getVal(storeOverall, ['missing_item'])}${formatDelta(storeOverall, 'var_missing_item')}</p>
+                <p><strong>%Producto en mal estado:</strong> ${getVal(storeOverall, ['prod_quality'])}${formatDelta(storeOverall, 'var_prod_quality')}</p>
+                <p><strong>%Producto equivocado:</strong> ${getVal(storeOverall, ['wrong_item'])}${formatDelta(storeOverall, 'var_wrong_item')}</p>
+              `;
+                overallScoreDiv.classList.remove("hidden");
+                overallScoreDiv.classList.remove("oro", "plata", "bronce", "critico");
+                overallScoreDiv.classList.add(getColor(storeOverall.cluster_name_final_display));
+            } else {
+                overallScoreDiv.classList.add("hidden");
+            }
 
-            /* -------- Cards de SHOPPERS -------- */
-            const filtrados = data.filter(r => {
-                return r.country_name === userPaisNormalized &&
-                       (!franquicia || r.franchise_name === normalizedFranquicia) &&
-                       r.partner_name === normalizedSucursal &&
-                       r.semana === normalizedSemana &&
-                       (shopper === "" || r.shopper_name === normalizedShopper);
-            });
+            /* -------- Cards de SHOPPERS -------- */
+            const filtrados = data.filter(r => {
+                return r.country_name === userPaisNormalized &&
+                       (!franquicia || r.franchise_name === normalizedFranquicia) &&
+                       r.partner_name === normalizedSucursal &&
+                       r.semana === normalizedSemana &&
+                       (shopper === "" || r.shopper_name === normalizedShopper);
+            });
 
-            if (filtrados.length === 0 && !storeOverall) {
-                msg.textContent = "No se encontraron resultados para los filtros seleccionados.";
-                return;
-            }
+            if (filtrados.length === 0 && !storeOverall) {
+                msg.textContent = "No se encontraron resultados para los filtros seleccionados.";
+                return;
+            }
 
-            if (shopper !== "") {
-              const shopperData = filtrados.find(r => r.shopper_name === normalizedShopper);
-              if (shopperData) {
-                cont.appendChild(crearCard(shopperData, shopperData.shopper_name_display));
-              } else {
-                msg.textContent = "No se encontraron datos para el shopper seleccionado.";
-              }
-            } else {
-              filtrados.forEach(r => cont.appendChild(crearCard(r, r.shopper_name_display)));
-            }
-        }
-function crearCard(r, titulo) {
-            const div = document.createElement("div");
-            div.className = "card " + getColor(r.cluster_name_final_display); 
-            const oppHTML = renderOportunidadHTML(r.oportunidad_de_mejora_display || '');
+            if (shopper !== "") {
+              const shopperData = filtrados.find(r => r.shopper_name === normalizedShopper);
+              if (shopperData) {
+                cont.appendChild(crearCard(shopperData, shopperData.shopper_name_display));
+              } else {
+                msg.textContent = "No se encontraron datos para el shopper seleccionado.";
+              }
+            } else {
+              filtrados.forEach(r => cont.appendChild(crearCard(r, r.shopper_name_display)));
+            }
+        }
 
-            div.innerHTML = `
-                <h3>${titulo || '-'}</h3>
-                <p><strong>Puntaje:</strong> ${getVal(r, ['shopper_scoring'])}${formatDelta(r, 'var_shopper_scoring')}</p>
-                <p><strong>Posición:</strong> ${r.cluster_name_final_display || '-'}</p>
+        function crearCard(r, titulo) {
+            const div = document.createElement("div");
+            div.className = "card " + getColor(r.cluster_name_final_display);
+            const oppHTML = renderOportunidadHTML(r.oportunidad_de_mejora_display || '');
+
+            div.innerHTML = `
+                <h3>${titulo || '-'}</h3>
+                <p><strong>Puntaje:</strong> ${getVal(r, ['shopper_scoring'])}${formatDelta(r, 'var_shopper_scoring')}</p>
+                <p><strong>Posición:</strong> ${r.cluster_name_final_display || '-'}</p>
                 <p><strong>Nivel de Experiencia:</strong> ${r.nivel_experiencia_display || '-'}</p>
-              
-                ${oppHTML}
-                <p><strong>Semana:</strong> ${r.semana_display || '-'}</p>
+                ${oppHTML}
+                <p><strong>Semana:</strong> ${r.semana_display || '-'}</p>
 
-                <h4>TIEMPOS</h4>
-                <p><strong>Puntaje Tiempos:</strong> ${getVal(r, ['timing_compliance'])}${formatDelta(r, 'var_timing_compliance')}</p>
-                <p><strong>Tiempo por orden:</strong> ${getVal(r, ['picking_time'])}${formatDelta(r, 'var_picking_time_puntos')}</p>
-                <p><strong>%Órdenes tarde:</strong> ${getVal(r, ['picking_late'])}${formatDelta(r, 'var_picking_late')}</p>
-                <p><strong>Tiempo en encontrar primer item:</strong> ${getVal(r, ['first_prod_time'])}${formatDelta(r, 'var_first_prod_time_puntos')}</p>
-                <p><strong>%Primer item encontrado > 3':</strong> ${getVal(r, ['first_prod_late'])}${formatDelta(r, 'var_first_prod_late')}</p>
+                <h4>TIEMPOS</h4>
+                <p><strong>Puntaje Tiempos:</strong> ${getVal(r, ['timing_compliance'])}${formatDelta(r, 'var_timing_compliance')}</p>
+                <p><strong>Tiempo por orden:</strong> ${getVal(r, ['picking_time'])}${formatDelta(r, 'var_picking_time_puntos')}</p>
+                <p><strong>%Órdenes tarde:</strong> ${getVal(r, ['picking_late'])}${formatDelta(r, 'var_picking_late')}</p>
+                <p><strong>Tiempo en encontrar primer item:</strong> ${getVal(r, ['first_prod_time'])}${formatDelta(r, 'var_first_prod_time_puntos')}</p>
+                <p><strong>%Primer item encontrado > 3':</strong> ${getVal(r, ['first_prod_late'])}${formatDelta(r, 'var_first_prod_late')}</p>
 
-                <h4>PICKING</h4>
-                <p><strong>Puntaje Picking:</strong> ${getVal(r, ['picking_compliance'])}${formatDelta(r, 'var_picking_compliance')}</p>
-                <p><strong>%Cancelaciones por falta de producto:</strong> ${getVal(r, ['OOS_FR'])}${formatDelta(r, 'var_OOS_FR')}</p>
-                <p><strong>%Productos no encontrados:</strong> ${getVal(r, ['not_found_rate'])}${formatDelta(r, 'var_not_found_rate')}</p>
-                <p><strong>%Reemplazos enviados:</strong> ${getVal(r, ['rep_sent'])}${formatDelta(r, 'var_rep_sent')}</p>
-                <p><strong>%Reemplazos aceptados:</strong> ${getVal(r, ['rep_rate'])}${formatDelta(r, 'var_rep_rate')}</p>
+                <h4>PICKING</h4>
+                <p><strong>Puntaje Picking:</strong> ${getVal(r, ['picking_compliance'])}${formatDelta(r, 'var_picking_compliance')}</p>
+                <p><strong>%Cancelaciones por falta de producto:</strong> ${getVal(r, ['OOS_FR'])}${formatDelta(r, 'var_OOS_FR')}</p>
+                <p><strong>%Productos no encontrados:</strong> ${getVal(r, ['not_found_rate'])}${formatDelta(r, 'var_not_found_rate')}</p>
+                <p><strong>%Reemplazos enviados:</strong> ${getVal(r, ['rep_sent'])}${formatDelta(r, 'var_rep_sent')}</p>
+                <p><strong>%Reemplazos aceptados:</strong> ${getVal(r, ['rep_rate'])}${formatDelta(r, 'var_rep_rate')}</p>
 
-                <h4>CALIDAD</h4>
-                <p><strong>Puntaje Calidad:</strong> ${getVal(r, ['quality_compliance'])}${formatDelta(r, 'var_quality_compliance')}</p>
-                <p><strong>%Falta producto:</strong> ${getVal(r, ['missing_item'])}${formatDelta(r, 'var_missing_item')}</p>
-                <p><strong>%Producto en mal estado:</strong> ${getVal(r, ['prod_quality'])}${formatDelta(r, 'var_prod_quality')}</p>
-                <p><strong>%Producto equivocado:</strong> ${getVal(r, ['wrong_item'])}${formatDelta(r, 'var_wrong_item')}</p>
-            `;
-            return div;
-        }
-    
+                <h4>CALIDAD</h4>
+                <p><strong>Puntaje Calidad:</strong> ${getVal(r, ['quality_compliance'])}${formatDelta(r, 'var_quality_compliance')}</p>
+                <p><strong>%Falta producto:</strong> ${getVal(r, ['missing_item'])}${formatDelta(r, 'var_missing_item')}</p>
+                <p><strong>%Producto en mal estado:</strong> ${getVal(r, ['prod_quality'])}${formatDelta(r, 'var_prod_quality')}</p>
+                <p><strong>%Producto equivocado:</strong> ${getVal(r, ['wrong_item'])}${formatDelta(r, 'var_wrong_item')}</p>
+            `;
+            return div;
+        }
 
         function getColor(pos) {
             if (!pos) return '';
@@ -589,59 +522,76 @@ function crearCard(r, titulo) {
         }
 
         function mostrarCortes() {
-            const franquicia = document.getElementById("franquicia").value;
-            const cont = document.getElementById("cortes");
-            cont.innerHTML = "";
+          const franquicia = document.getElementById("franquicia").value;
+          const cont = document.getElementById("cortes");
+          cont.innerHTML = "";
 
-            if (!userPaisNormalized) return;
+          if (!userPaisNormalized) return;
 
-            let rows = [];
-            let title = "";
-            const normalizedFranquicia = normalizeString(franquicia);
+          let rows = [];
+          let title = "";
+          const normalizedFranquicia = normalizeString(franquicia);
 
-            if (franquicia) { 
-                rows = clusterData.filter(r => 
-                    r.country_name === userPaisNormalized && 
-                    r.franchise_name === normalizedFranquicia
-                );
-                title = `Condiciones por Posición (${franquicia})`;
-            }
+          if (franquicia) {
+            rows = clusterData.filter(r =>
+              r.country_name === userPaisNormalized &&
+              r.franchise_name === normalizedFranquicia
+            );
+            title = `Condiciones por Posición (${franquicia})`;
+          }
 
-            if (rows.length === 0) {
-                rows = clusterData.filter(r => 
-                    r.country_name === userPaisNormalized && 
-                    (!r.franchise_name || r.franchise_name === '')
-                ); 
-                title = `Condiciones por Posición (${userPaisDisplayName})`; 
-            }
+          if (rows.length === 0) {
+            rows = clusterData.filter(r =>
+              r.country_name === userPaisNormalized &&
+              (!r.franchise_name || r.franchise_name === "")
+            );
+            title = `Condiciones por Posición (${userPaisDisplayName})`;
+          }
 
-            if (!rows.length) {
-                cont.innerHTML = "<p>No se encontraron condiciones de cortes para este país o franquicia.</p>";
-                return;
-            }
+          if (!rows.length) {
+            cont.innerHTML = "<p>No se encontraron condiciones de cortes para este país o franquicia.</p>";
+            return;
+          }
 
-            let html = `<h3>${title}</h3>`;
-            html += `<table style="width:100%;">
-                <thead>
-                    <tr>
-                        <th>Posición</th>
-                        <th>Puntaje</th>
-                        <th>Tiempos Mínimo</th>
-                        <th>Picking Mínimo</th>
-                        <th>Calidad Mínimo</th>
-                    </tr>
-                </thead><tbody>`;
-            rows.forEach(r => {
-                html += `<tr>
-                    <td>${r.cluster_name_display || '-'}</td>
-                    <td>${(r.lower_bound_display !== undefined && r.lower_bound_display !== null ? r.lower_bound_display : '-')} - ${(r.upper_bound_display !== undefined && r.upper_bound_display !== null ? r.upper_bound_display : '-')}</td>
-                    <td>${r.min_timing_compliance_display || '-'}</td>
-                    <td>${r.min_picking_compliance_display || '-'}</td>
-                    <td>${r.min_quality_compliance_display || '-'}</td>
-                </tr>`;
-            });
-            html += `</tbody></table>`;
-            cont.innerHTML = html;
+          // Título + subtítulo
+          let html = `
+            <h3>${title}</h3>
+            <p style="margin-top:-6px;font-size:0.95rem;color:#555;line-height:1.4;">
+              Esta tabla muestra los valores mínimos de desempeño que debe cumplir cada posición
+              en <strong>Tiempos</strong>, <strong>Picking</strong> y <strong>Calidad</strong>.
+              Si alguna de estas métricas está por debajo del umbral, el shopper descenderá de posición
+              incluso si su <strong>puntaje global</strong> se encuentra dentro del rango correspondiente.
+            </p>
+          `;
+
+          html += `
+            <table style="width:100%;">
+              <thead>
+                <tr>
+                  <th>Posición</th>
+                  <th>Puntaje</th>
+                  <th>Tiempos Mínimo</th>
+                  <th>Picking Mínimo</th>
+                  <th>Calidad Mínimo</th>
+                </tr>
+              </thead>
+              <tbody>
+          `;
+
+          rows.forEach(r => {
+            html += `
+              <tr>
+                <td>${r.cluster_name_display || "-"}</td>
+                <td>${(r.lower_bound_display ?? "-")} - ${(r.upper_bound_display ?? "-")}</td>
+                <td>${r.min_timing_compliance_display || "-"}</td>
+                <td>${r.min_picking_compliance_display || "-"}</td>
+                <td>${r.min_quality_compliance_display || "-"}</td>
+              </tr>
+            `;
+          });
+
+          html += `</tbody></table>`;
+          cont.innerHTML = html;
         }
 
         function cargarDatos() {
@@ -680,7 +630,6 @@ function crearCard(r, titulo) {
                         },
                         error: function(err) {
                             safeError(label || 'FUENTE', err);
-                            // Rechazamos con un mensaje sin URL
                             reject(new Error(`No se pudo cargar la fuente ${label || 'de datos'}.`));
                         }
                     });
@@ -704,7 +653,6 @@ function crearCard(r, titulo) {
                 document.getElementById("mensaje").textContent = "Datos cargados correctamente.";
             })
             .catch(() => {
-                // Mensaje visible al usuario SIN URLs
                 document.getElementById("mensaje").textContent = "Error crítico al cargar datos. Reintentá en unos minutos.";
                 safeError('Promise.all', 'Fallo de carga de una o más fuentes');
             });
@@ -712,27 +660,3 @@ function crearCard(r, titulo) {
     </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
