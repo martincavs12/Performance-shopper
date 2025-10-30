@@ -113,8 +113,8 @@
 
     <div class="container hidden" id="app">
         <h2>Reporte de Performance</h2>
-      <!-- <div id="bannerpanamapodio" class="banner-podio hidden"></div>
-        <div id="bannerPaisEspecifico" class="banner-especifico hidden"></div> -->
+        <div id="bannerpanamapodio" class="banner-podio hidden"></div>
+        <div id="bannerPaisEspecifico" class="banner-especifico hidden"></div>
         <label for="pais">País</label>
         <select id="pais" disabled><option value="">Seleccionar</option></select>
         
@@ -252,7 +252,7 @@ const PDF_URL = "https://drive.google.com/file/d/1F1TDRak4iPKly98hPAEZxMMQDIbp22
 // Países EXCLUIDOS del banner (usar SIEMPRE normalizados)
 const EXCLUDED_BANNER = new Set(["panama", "republica dominicana"]);
 
-/* ===== DESACTIVADO TEMPORALMENTE: Banner Top Shoppers Panamá =====
+/* FUNCIÓN PARA BANNER PODIO PANAMÁ */
 function showBannerPanamaPodio() {
   const el = document.getElementById("bannerpanamapodio");
   if (!el) return;
@@ -289,7 +289,7 @@ function showBannerPanamaPodio() {
   } else {
     el.classList.add("hidden"); // Lo oculta para todos los demás
   }
-} -->
+}
 // UBICACIÓN: Junto a las otras funciones de banners.
 
 /*
@@ -588,76 +588,61 @@ function crearCard(r, titulo) {
             return '';
         }
 
-       function mostrarCortes() {
-    const franquicia = document.getElementById("franquicia").value;
-    const cont = document.getElementById("cortes");
-    cont.innerHTML = "";
+        function mostrarCortes() {
+            const franquicia = document.getElementById("franquicia").value;
+            const cont = document.getElementById("cortes");
+            cont.innerHTML = "";
 
-    if (!userPaisNormalized) return;
+            if (!userPaisNormalized) return;
 
-    let rows = [];
-    let title = "";
-    const normalizedFranquicia = normalizeString(franquicia);
+            let rows = [];
+            let title = "";
+            const normalizedFranquicia = normalizeString(franquicia);
 
-    if (franquicia) { 
-        rows = clusterData.filter(r => 
-            r.country_name === userPaisNormalized && 
-            r.franchise_name === normalizedFranquicia
-        );
-        title = `Condiciones por Posición (${franquicia})`;
-    }
+            if (franquicia) { 
+                rows = clusterData.filter(r => 
+                    r.country_name === userPaisNormalized && 
+                    r.franchise_name === normalizedFranquicia
+                );
+                title = `Condiciones por Posición (${franquicia})`;
+            }
 
-    if (rows.length === 0) {
-        rows = clusterData.filter(r => 
-            r.country_name === userPaisNormalized && 
-            (!r.franchise_name || r.franchise_name === '')
-        ); 
-        title = `Condiciones por Posición (${userPaisDisplayName})`; 
-    }
+            if (rows.length === 0) {
+                rows = clusterData.filter(r => 
+                    r.country_name === userPaisNormalized && 
+                    (!r.franchise_name || r.franchise_name === '')
+                ); 
+                title = `Condiciones por Posición (${userPaisDisplayName})`; 
+            }
 
-    if (!rows.length) {
-        cont.innerHTML = "<p>No se encontraron condiciones de cortes para este país o franquicia.</p>";
-        return;
-    }
+            if (!rows.length) {
+                cont.innerHTML = "<p>No se encontraron condiciones de cortes para este país o franquicia.</p>";
+                return;
+            }
 
-    // ✅ Agregamos subtítulo explicativo justo después del título
-    let html = `
-        <h3>${title}</h3>
-        <p style="
-            margin-top: -6px;
-            font-size: 0.95rem;
-            color: #555;
-            line-height: 1.4;
-        ">
-            Esta tabla muestra los valores mínimos de desempeño que debe cumplir cada posición en <strong>Tiempos</strong>, <strong>Picking</strong> y <strong>Calidad</strong>.
-Si alguna de estas métricas está por debajo del umbral, el shopper descenderá de posición incluso si su <strong>puntaje global</strong> se encuentra dentro del rango correspondiente.
-        </p>
-    `;
-
-    html += `<table style="width:100%;">
-        <thead>
-            <tr>
-                <th>Posición</th>
-                <th>Puntaje</th>
-                <th>Tiempos Mínimo</th>
-                <th>Picking Mínimo</th>
-                <th>Calidad Mínimo</th>
-            </tr>
-        </thead><tbody>`;
-
-    rows.forEach(r => {
-        html += `<tr>
-            <td>${r.cluster_name_display || '-'}</td>
-            <td>${(r.lower_bound_display !== undefined && r.lower_bound_display !== null ? r.lower_bound_display : '-')} - ${(r.upper_bound_display !== undefined && r.upper_bound_display !== null ? r.upper_bound_display : '-')}</td>
-            <td>${r.min_timing_compliance_display || '-'}</td>
-            <td>${r.min_picking_compliance_display || '-'}</td>
-            <td>${r.min_quality_compliance_display || '-'}</td>
-        </tr>`;
-    });
-
-    html += `</tbody></table>`;
-    cont.innerHTML = html;
-}
+            let html = `<h3>${title}</h3>`;
+            html += `<table style="width:100%;">
+                <thead>
+                    <tr>
+                        <th>Posición</th>
+                        <th>Puntaje</th>
+                        <th>Tiempos Mínimo</th>
+                        <th>Picking Mínimo</th>
+                        <th>Calidad Mínimo</th>
+                    </tr>
+                </thead><tbody>`;
+            rows.forEach(r => {
+                html += `<tr>
+                    <td>${r.cluster_name_display || '-'}</td>
+                    <td>${(r.lower_bound_display !== undefined && r.lower_bound_display !== null ? r.lower_bound_display : '-')} - ${(r.upper_bound_display !== undefined && r.upper_bound_display !== null ? r.upper_bound_display : '-')}</td>
+                    <td>${r.min_timing_compliance_display || '-'}</td>
+                    <td>${r.min_picking_compliance_display || '-'}</td>
+                    <td>${r.min_quality_compliance_display || '-'}</td>
+                </tr>`;
+            });
+            html += `</tbody></table>`;
+            cont.innerHTML = html;
+        }
 
         function cargarDatos() {
             const sheetDataURL    = csvByGid("0");           // Shopper ID
@@ -727,8 +712,6 @@ Si alguna de estas métricas está por debajo del umbral, el shopper descenderá
     </script>
 </body>
 </html>
-
-
 
 
 
