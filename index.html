@@ -5,6 +5,23 @@
     <title>Reporte de Performance - PedidosYa</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap" rel="stylesheet" />
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-3P5PS1Z78W"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){ dataLayer.push(arguments); }
+  gtag('js', new Date());
+
+  (function () {
+    const esProd = location.hostname === 'performance-shopper.vercel.app';
+    if (esProd) {
+      gtag('config', 'G-3P5PS1Z78W');
+    } else {
+      console.log('[GA4] Desactivado en entorno no productivo:', location.hostname);
+    }
+  })();
+</script>
+
     <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
     <style>
         body { font-family: 'Outfit', sans-serif; margin: 0; background: #f4f4f4; color: #100423; }
@@ -681,5 +698,6 @@
     </script>
 </body>
 </html>
+
 
 
