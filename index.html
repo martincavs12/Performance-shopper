@@ -93,7 +93,7 @@
         <h2>Reporte de Performance</h2>
 
         <!-- Desactivado temporalmente: Top Shoppers Panamá -->
-        <!-- <div id="bannerpanamapodio" class="banner-podio hidden"></div> -->
+        <div id="bannerpanamapodio" class="banner-podio hidden"></div>
 
         <!-- Activo: Novedad / mensajes por país -->
         <div id="bannerPaisEspecifico" class="banner-especifico hidden"></div>
@@ -221,18 +221,40 @@
         // Países EXCLUIDOS del banner (por si necesitás lógica adicional)
         const EXCLUDED_BANNER = new Set(["panama", "republica dominicana"]);
 
-        /* ===== DESACTIVADO TEMPORALMENTE: Banner Top Shoppers Panamá =====
         function showBannerPanamaPodio() {
           const el = document.getElementById("bannerpanamapodio");
           if (!el) return;
           if (userPaisNormalized === "panama") {
-            el.innerHTML = `...`; // (contenido original)
+            el.innerHTML = `<div style="text-align: center; margin-bottom: 12px;">
+        <strong>🏆 ¡Top Shoppers Octubre - Panamá! 🏆</strong>
+      </div>
+
+      <ol style="padding-left: 20px; margin: 0;">
+        <li><strong>Sergio Pinto</strong> – Supermercados Rey David – 96.9 🥇</li>
+        <li><strong>Anthony De La Rosa</strong> – Supermercados Rey Brisas del Golf – 96.4 🥈</li>
+        <li><strong>Daniel Samudio</strong> – Supermercados Rey David – 96.1 🥉</li>
+      </ol>
+
+      <div style="text-align: center; margin-top: 16px; margin-bottom: 12px;">
+        <strong>Menciones Honoríficas 🏅</strong>
+      </div>
+
+      <ul style="padding-left: 20px; margin: 0; list-style-type: '– '; ">
+        <li><strong>Isidro Dutary</strong> – Supermercados Rey Vía España – 97.1 🏅</li>
+        <li><strong>Jorge Aguilar</strong> – Supermercados Rey David – 95.5 🏅</li>
+        <li><strong>José Espinosa</strong> – Supermercados Rey Calle 50 – 95 🏅</li>
+        <li><strong>Betzaida Villarreal</strong> – Supermercados Rey Centennial – 94.5 🏅</li>
+        <li><strong>Bladimir Otero</strong> – Supermercados Rey Centennial – 94.2 🏅</li>
+        <li><strong>Luis Osano</strong> – Supermercados Rey David – 93.8 🏅</li>
+        <li><strong>Efraín Rodríguez</strong> – Supermercados Rey Vía España – 93.7 🏅</li>
+      </ul>
+      `; 
             el.classList.remove("hidden");
           } else {
             el.classList.add("hidden");
           }
         }
-        */
+        
 
         // Activo: Banner por país
         function showBannerPaisEspecifico() {
@@ -283,7 +305,7 @@
                 document.getElementById("pais").innerHTML = `<option value="${userPaisDisplayName}">${userPaisDisplayName}</option>`;
 
                 // Banner Panamá desactivado:
-                // showBannerPanamaPodio();
+                showBannerPanamaPodio();
 
                 // Banner por país activo:
                 showBannerPaisEspecifico();
@@ -659,4 +681,5 @@
     </script>
 </body>
 </html>
+
 
