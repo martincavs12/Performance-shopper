@@ -110,7 +110,7 @@
         <h2>Reporte de Performance</h2>
 
         <!-- Desactivado temporalmente: Top Shoppers Panamá -->
-        <div id="bannerpanamapodio" class="banner-podio hidden"></div>
+        <div id="bannerpodio" class="banner-podio hidden"></div>
 
         <!-- Activo: Novedad / mensajes por país -->
         <div id="bannerPaisEspecifico" class="banner-especifico hidden"></div>
@@ -238,10 +238,31 @@
         // Países EXCLUIDOS del banner (por si necesitás lógica adicional)
         const EXCLUDED_BANNER = new Set(["panama", "republica dominicana"]);
 
-        function showBannerPanamaPodio() {
-          const el = document.getElementById("bannerpanamapodio");
+        function showBannerpodio() {
+          const el = document.getElementById("bannerpodio");
           if (!el) return;
-          if (userPaisNormalized === "panama") {
+              let content = null;
+  let title = '';
+            if (userPaisNormalized === "ecuador") { 
+            title = '🏆 ¡Top Shoppers Octubre - Ecuador! 🏆';
+            // Listado directo de los 10 shoppers de Ecuador
+            content = `
+              <ol style="padding-left: 20px; margin: 0; list-style-type: decimal;">
+                <li><strong>Bryan Pinos</strong> – 96% (Oro) 🥇</li>
+                <li><strong>Guadalupe Gualan</strong> – 93% (Oro) 🥇</li>
+                <li><strong>Guadalupe de la Cruz</strong> – 95% (Plata) 🥈</li>
+                <li><strong>Margorie Ramirez</strong> – 94% (Plata) </li>
+                <li><strong>Angelo Yepez</strong> – 94% (Plata)</li>
+                <li><strong>Gabriela Gualan</strong> – 93% (Oro)</li>
+                <li><strong>Tatiana Espinoza</strong> – 93% (Plata)</li>
+                <li><strong>Veronica Ordoñez</strong> – 93% (Plata)</li>
+                <li><strong>Johana Cargua</strong> – 93% (Plata)</li>
+                <li><strong>Claudio Renjel</strong> – 93% (Plata)</li>
+                <li><strong>Raquel Sierra</strong> – 93% (Plata)</li>
+              </ol>
+            `;
+          }
+          else if (userPaisNormalized === "panama") {
             el.innerHTML = `<div style="text-align: center; margin-bottom: 12px;">
         <strong>🏆 ¡Top Shoppers Octubre - Panamá! 🏆</strong>
       </div>
@@ -266,11 +287,17 @@
         <li><strong>Efraín Rodríguez</strong> – Supermercados Rey Vía España – 93.7 🏅</li>
       </ul>
       `; 
-            el.classList.remove("hidden");
-          } else {
-            el.classList.add("hidden");
-          }
-        }
+          } 
+            if (content) {
+        el.innerHTML = `<div style="text-align: center; margin-bottom: 12px;">${title}</div>${content}`;
+        el.classList.remove("hidden");
+        // Aseguramos que la clase 'banner-especifico' (verde) esté removida en caso de conflicto
+        el.classList.remove("banner-especifico"); 
+        // La clase 'banner-podio' ya está en el HTML, no es necesario re-agregarla.
+    } else {
+        el.classList.add("hidden");
+    }
+}
         
 
         // Activo: Banner por país
@@ -322,7 +349,7 @@
                 document.getElementById("pais").innerHTML = `<option value="${userPaisDisplayName}">${userPaisDisplayName}</option>`;
 
                 // Banner Panamá desactivado:
-                showBannerPanamaPodio();
+                showBannerpodio();
 
                 // Banner por país activo:
                 showBannerPaisEspecifico();
@@ -698,6 +725,7 @@
     </script>
 </body>
 </html>
+
 
 
 
