@@ -261,33 +261,34 @@
               </ol>
             `;
           }
-          else if (userPaisNormalized === "panama") {
-            el.innerHTML = `<div style="text-align: center; margin-bottom: 12px;">
-        <strong>🏆 ¡Top Shoppers Noviembre - Panamá! 🏆</strong>
-      </div>
+         else if (userPaisNormalized === "panama") {
+        // 1. Definimos el título para que la lógica final lo detecte
+        title = '🏆 ¡Top Shoppers Noviembre - Panamá! 🏆';
+        
+        // 2. Asignamos el contenido a la variable 'content'
+        content = `
+          <ol style="padding-left: 20px; margin: 0;">
+            <li><strong>Sergio Pinto</strong> – Supermercados Rey David – 95.7 🥇</li>
+            <li><strong>Daniel Samudio</strong> – Supermercados Rey David – 95.2 🥈</li>
+            <li><strong>Jorge Aguilar</strong> – Supermercados Rey David – 94.8 🥉</li>
+          </ol>
 
-      <ol style="padding-left: 20px; margin: 0;">
-        <li><strong>Sergio Pinto</strong> – Supermercados Rey David – 95.7 🥇</li>
-        <li><strong>Daniel Samudio</strong> – Supermercados Rey David – 95.2 🥈</li>
-        <li><strong>Jorge Aguilar</strong> – Supermercados Rey David – 94.8 🥉</li>
-      </ol>
+          <div style="text-align: center; margin-top: 16px; margin-bottom: 12px;">
+            <strong>Menciones Honoríficas 🏅</strong>
+          </div>
 
-      <div style="text-align: center; margin-top: 16px; margin-bottom: 12px;">
-        <strong>Menciones Honoríficas 🏅</strong>
-      </div>
-
-      <ul style="padding-left: 20px; margin: 0; list-style-type: '– '; ">
-        <li><strong>Isidro Dutary</strong> – Supermercados Rey Costa del Este – 95.9 🏅</li>
-        <li><strong>Luis Osano</strong> – Supermercados Rey David – 95.5 🏅</li>
-        <li><strong>Joseph Matheus</strong> – Supermercados Rey Paseo Albrook – 95.2 🏅</li>
-        <li><strong>Sherlyn de la Rosa</strong> – Supermercados Rey Centennial – 95.2 🏅</li>
-        <li><strong>José Sánchez</strong> – Supermercados Rey Costa Verde – 94.9 🏅</li>
-        <li><strong>Anthony De La Rosa</strong> – Hiper Rey Los Pueblos – 94.8 🏅</li>
-        <li><strong>Bladimir Otero</strong> – Supermercados Rey Centennial – 94.8 🏅</li>
-        <li><strong>Jose Espinosa</strong> – Supermercados Rey Calle 50 – 94.2 🏅</li>
-      </ul>
-      `;  
-          }
+          <ul style="padding-left: 20px; margin: 0; list-style-type: '– '; ">
+            <li><strong>Isidro Dutary</strong> – Supermercados Rey Costa del Este – 95.9 🏅</li>
+            <li><strong>Luis Osano</strong> – Supermercados Rey David – 95.5 🏅</li>
+            <li><strong>Joseph Matheus</strong> – Supermercados Rey Paseo Albrook – 95.2 🏅</li>
+            <li><strong>Sherlyn de la Rosa</strong> – Supermercados Rey Centennial – 95.2 🏅</li>
+            <li><strong>José Sánchez</strong> – Supermercados Rey Costa Verde – 94.9 🏅</li>
+            <li><strong>Anthony De La Rosa</strong> – Hiper Rey Los Pueblos – 94.8 🏅</li>
+            <li><strong>Bladimir Otero</strong> – Supermercados Rey Centennial – 94.8 🏅</li>
+            <li><strong>Jose Espinosa</strong> – Supermercados Rey Calle 50 – 94.2 🏅</li>
+          </ul>
+        `;
+      }
             if (content) {
         el.innerHTML = `<div style="text-align: center; margin-bottom: 12px;">${title}</div>${content}`;
         el.classList.remove("hidden");
@@ -740,6 +741,7 @@
     </script>
 </body>
 </html>
+
 
 
 
