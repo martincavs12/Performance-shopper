@@ -528,7 +528,10 @@
               `;
                 overallScoreDiv.classList.remove("hidden");
                 overallScoreDiv.classList.remove("oro", "plata", "bronce", "critico");
-                overallScoreDiv.classList.add(getColor(storeOverall.cluster_name_final_display));
+                const colorClase = getColor(storeOverall.cluster_name_final_display);
+              if (colorClase) {
+               overallScoreDiv.classList.add(colorClase);
+}
             } else {
                 overallScoreDiv.classList.add("hidden");
             }
@@ -743,6 +746,7 @@
     </script>
 </body>
 </html>
+
 
 
 
