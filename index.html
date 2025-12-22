@@ -245,25 +245,7 @@
           if (!el) return;
               let content = null;
   let title = '';
-            if (userPaisNormalized === "ecuador") { 
-            title = '🏆 ¡Top Shoppers Octubre - Ecuador! 🏆';
-            // Listado directo de los 10 shoppers de Ecuador
-            content = `
-              <ol style="padding-left: 20px; margin: 0; list-style-type: decimal;">
-                <li><strong>Bryan Pinos<strong> – 96% (Oro) 🥇</li>
-                <li><strong>Gabriela Gualan</strong> – 93% (Oro) 🥇</li>
-                <li><strong>Guadalupe de la Cruz</strong> – 95% (Plata) 🥈</li>
-                <li><strong>Margorie Ramirez</strong> – 94% (Plata)</li>
-                <li><strong>Angelo Yepez</strong> – 94% (Plata)</li>
-                <li><strong>Tatiana Espinoza</strong> – 93% (Plata)</li>
-                <li><strong>Veronica Ordoñez</strong> – 93% (Plata)</li>
-                <li><strong>Johana Cargua</strong> – 93% (Plata)</li>
-                <li><strong>Claudio Renjel</strong> – 93% (Plata)</li>
-                <li><strong>Raquel Sierra</strong> – 93% (Plata)</li>
-              </ol>
-            `;
-          }
-         else if (userPaisNormalized === "panama") {
+         if (userPaisNormalized === "panama") {
         // 1. Definimos el título para que la lógica final lo detecte
         title = '🏆 ¡Top Shoppers Noviembre - Panamá! 🏆';
         
@@ -746,6 +728,7 @@
     </script>
 </body>
 </html>
+
 
 
 
