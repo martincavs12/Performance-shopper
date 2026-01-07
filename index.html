@@ -294,9 +294,29 @@
           const LINK_GENERAL = "https://drive.google.com/file/d/1PA_KcST20OiHI31W9nqcj1VdBhS6xMWC/view?usp=sharing"; 
 
           const MENSAJES_POR_PAIS = {
-              "argentina": `
+  // --- GRUPO 8/1 ---
+  "argentina": generarBanner("8/1"),
+  "uruguay": generarBanner("8/1"),
+
+  // --- GRUPO 12/1 ---
+  "bolivia": generarBanner("12/1"),
+  "ecuador": generarBanner("12/1"),
+  "peru": generarBanner("12/1"),
+
+  // --- GRUPO 15/1 ---
+  "paraguay": generarBanner("15/1"),
+  "panama": generarBanner("15/1"),
+  "guatemala": generarBanner("15/1"),
+  "honduras": generarBanner("15/1"),
+  "nicaragua": generarBanner("15/1"),
+  "republica dominicana": generarBanner("15/1")
+};
+
+// Función auxiliar para mantener el código limpio y replicar la estructura exactamente igual
+function generarBanner(fecha) {
+  return `
     <div style="font-size: 1.1rem; color: #100423; margin-bottom: 10px;">
-      <strong>🆕 Actualización a partir del 8/1 en pesables por unidad</strong>
+      <strong>🆕 Actualización a partir del ${fecha} en Pesables por Unidad</strong>
     </div>
 
     <div style="margin-bottom: 15px; line-height: 1.5; color: #215a36; text-align: left;">
@@ -307,28 +327,11 @@
 
     <div style="text-align: center;">
       <img src="PesablesPorUnidadPelican.png" 
-           alt="Detalle de Unidades en App" 
+           alt="Detalle de Unidades" 
            style="max-width: 100%; height: auto; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); border: 1px solid #b8e1c6;">
     </div>
-  `,
-  "uruguay": `
-    <div style="font-size: 1.1rem; color: #100423; margin-bottom: 10px;">
-      <strong>🇺🇾 Actualización a partir del 8/1 en pesables por unidad</strong>
-    </div>
-
-    <div style="margin-bottom: 15px; line-height: 1.5; color: #215a36; text-align: left;">
-      Las unidades ahora tendrán un espacio propio dentro de la tarjeta con el detalle del producto.
-      <br><br>
-      También será posible ajustar la cantidad de unidades que se enviarán al cliente en caso de que se mande una cantidad diferente a la que solicita.
-    </div>
-
-    <div style="text-align: center;">
-      <img src="PesablesPorUnidadPelican.png" 
-           alt="Detalle de Unidades Uruguay" 
-           style="max-width: 100%; height: auto; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); border: 1px solid #b8e1c6;">
-    </div>
-  `   
-          };
+  `;
+}
 
           const mensaje = MENSAJES_POR_PAIS[userPaisNormalized];
           if (mensaje) {
@@ -734,6 +737,7 @@
     </script>
 </body>
 </html>
+
 
 
 
