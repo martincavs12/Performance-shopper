@@ -241,22 +241,21 @@
 
         // Países EXCLUIDOS del banner (por si necesitás lógica adicional)
         const EXCLUDED_BANNER = new Set(["panama", "republica dominicana"]);
+function showBannerpodio() {
+    const el = document.getElementById("bannerpodio");
+    if (!el) return;
 
-        function showBannerpodio() {
-          const el = document.getElementById("bannerpodio");
-          if (!el) return;
-              let content = null;
-  let title = '';
-         if (userPaisNormalized === "panama") {
-        // 1. Definimos el título para que la lógica final lo detecte
-        title = '🏆 ¡Top Shoppers Noviembre - Panamá! 🏆';
+    let content = null;
+    let title = '';
+
+    if (userPaisNormalized === "panama") {
+        title = '🏆 ¡Top Shoppers Diciembre - Panamá! 🏆';
         
-        // 2. Asignamos el contenido a la variable 'content'
         content = `
           <ol style="padding-left: 20px; margin: 0;">
-            <li><strong>Sergio Pinto</strong> – Supermercados Rey David – 95.7 🥇</li>
-            <li><strong>Daniel Samudio</strong> – Supermercados Rey David – 95.2 🥈</li>
-            <li><strong>Jorge Aguilar</strong> – Supermercados Rey David – 94.8 🥉</li>
+            <li><strong>Anthony De La Rosa</strong> – Hiper rey los pueblos – 96.4 🥇</li>
+            <li><strong>Daniel Samudio</strong> – Supermercados rey David – 96.0 🥈</li>
+            <li><strong>Sergio Pinto</strong> – Supermercados rey David – 95.3 🥉</li>
           </ol>
 
           <div style="text-align: center; margin-top: 16px; margin-bottom: 12px;">
@@ -264,17 +263,18 @@
           </div>
 
           <ul style="padding-left: 20px; margin: 0; list-style-type: '– '; ">
-            <li><strong>Isidro Dutary</strong> – Supermercados Rey Costa del Este – 95.9 🏅</li>
-            <li><strong>Luis Osano</strong> – Supermercados Rey David – 95.5 🏅</li>
-            <li><strong>Joseph Matheus</strong> – Supermercados Rey Paseo Albrook – 95.2 🏅</li>
-            <li><strong>Sherlyn de la Rosa</strong> – Supermercados Rey Centennial – 95.2 🏅</li>
-            <li><strong>José Sánchez</strong> – Supermercados Rey Costa Verde – 94.9 🏅</li>
-            <li><strong>Anthony De La Rosa</strong> – Hiper Rey Los Pueblos – 94.8 🏅</li>
-            <li><strong>Bladimir Otero</strong> – Supermercados Rey Centennial – 94.8 🏅</li>
-            <li><strong>Jose Espinosa</strong> – Supermercados Rey Calle 50 – 94.2 🏅</li>
+            <li><strong>Isidro Dutary</strong> – Supermecados rey costa del este – 97.4 🏅</li>
+            <li><strong>Luis Osano</strong> – Supermercados rey David – 95.8 🏅</li>
+            <li><strong>Bladimir Otero</strong> – Supermecados rey centennial – 95.2 🏅</li>
+            <li><strong>Betzaida Villarreal</strong> – Supermecados rey brisas del golf – 95.0 🏅</li>
+            <li><strong>Joseph Matheus</strong> – Supermercados rey paseo albrook – 94.9 🏅</li>
+            <li><strong>José Sánchez</strong> – Supermecados rey costa verde – 94.9 🏅</li>
+            <li><strong>Jorge Aguilar</strong> – Supermercados rey David – 94.2 🏅</li>
+            <li><strong>Bexelis Pérez</strong> – Supermercados rey costa verde – 94.1 🏅</li>
           </ul>
         `;
-      }
+    }
+        
             if (content) {
         el.innerHTML = `<div style="text-align: center; margin-bottom: 12px;">${title}</div>${content}`;
         el.classList.remove("hidden");
@@ -357,8 +357,8 @@ function generarBanner(fecha) {
                 document.getElementById("app").classList.remove("hidden");
                 document.getElementById("pais").innerHTML = `<option value="${userPaisDisplayName}">${userPaisDisplayName}</option>`;
 
-                // Banner Panamá desactivado:
-                //showBannerpodio();
+                // Banner Podio desactivado:
+                showBannerpodio();
 
                 // Banner por país activo:
                 showBannerPaisEspecifico();
@@ -737,6 +737,7 @@ function generarBanner(fecha) {
     </script>
 </body>
 </html>
+
 
 
 
