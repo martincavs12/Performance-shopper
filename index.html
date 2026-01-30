@@ -249,31 +249,18 @@ function showBannerpodio() {
     let title = '';
 
     if (userPaisNormalized === "panama") {
-        title = '🏆 ¡Top Shoppers Diciembre - Panamá! 🏆';
-        
-        content = `
-          <ol style="padding-left: 20px; margin: 0;">
-            <li><strong>Anthony De La Rosa</strong> – Hiper rey los pueblos – 96.4 🥇</li>
-            <li><strong>Daniel Samudio</strong> – Supermercados rey David – 96.0 🥈</li>
-            <li><strong>Sergio Pinto</strong> – Supermercados rey David – 95.3 🥉</li>
-          </ol>
+  title = "🏆 Ganadores Trimestrales - Panamá 🏆";
 
-          <div style="text-align: center; margin-top: 16px; margin-bottom: 12px;">
-            <strong>Menciones Honoríficas 🏅</strong>
-          </div>
+  // Top 3 (trimestral) + voucher
+  content = `
+    <ol style="padding-left: 20px; margin: 0;">
+      <li><strong>Isidro Dutary</strong> – Supermercados Rey Vía España – 96.9 🥇 <span style="opacity:.85;">(Voucher: $50.00)</span></li>
+      <li><strong>Sergio Pinto</strong> – Supermercados Rey David – 96.2 🥈 <span style="opacity:.85;">(Voucher: $25.00)</span></li>
+      <li><strong>Daniel Samudio</strong> – Supermercados Rey David – 95.9 🥉 <span style="opacity:.85;">(Voucher: $25.00)</span></li>
+    </ol>
+  `;
+}
 
-          <ul style="padding-left: 20px; margin: 0; list-style-type: '– '; ">
-            <li><strong>Isidro Dutary</strong> – Supermecados rey costa del este – 97.4 🏅</li>
-            <li><strong>Luis Osano</strong> – Supermercados rey David – 95.8 🏅</li>
-            <li><strong>Bladimir Otero</strong> – Supermecados rey centennial – 95.2 🏅</li>
-            <li><strong>Betzaida Villarreal</strong> – Supermecados rey brisas del golf – 95.0 🏅</li>
-            <li><strong>Joseph Matheus</strong> – Supermercados rey paseo albrook – 94.9 🏅</li>
-            <li><strong>José Sánchez</strong> – Supermecados rey costa verde – 94.9 🏅</li>
-            <li><strong>Jorge Aguilar</strong> – Supermercados rey David – 94.2 🏅</li>
-            <li><strong>Bexelis Pérez</strong> – Supermercados rey costa verde – 94.1 🏅</li>
-          </ul>
-        `;
-    }
         
             if (content) {
         el.innerHTML = `<div style="text-align: center; margin-bottom: 12px;">${title}</div>${content}`;
@@ -737,6 +724,7 @@ function generarBanner(fecha) {
     </script>
 </body>
 </html>
+
 
 
 
